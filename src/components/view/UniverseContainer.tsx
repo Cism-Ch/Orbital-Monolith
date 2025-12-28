@@ -82,15 +82,25 @@ export const UniverseContainer: React.FC<UniverseContainerProps> = ({
 
         // Throttled mouse move handler for better performance
         let rafId: number | null = null;
+        let lastEvent: MouseEvent | null = null;
+        
         const handleMouseMove = (e: MouseEvent) => {
             if (!isDraggingRef.current) return;
+
+            // Store the latest event
+            lastEvent = e;
 
             // Use requestAnimationFrame for smooth performance
             if (rafId !== null) return;
             
             rafId = requestAnimationFrame(() => {
-                const deltaX = e.clientX - lastMouseRef.current.x;
-                const deltaY = e.clientY - lastMouseRef.current.y;
+                if (!lastEvent) {
+                    rafId = null;
+                    return;
+                }
+
+                const deltaX = lastEvent.clientX - lastMouseRef.current.x;
+                const deltaY = lastEvent.clientY - lastMouseRef.current.y;
 
                 // Update rotation (horizontal drag)
                 const rotationDelta = deltaX * 0.5;
@@ -109,7 +119,8 @@ export const UniverseContainer: React.FC<UniverseContainerProps> = ({
                     inclination: newInclination
                 });
 
-                lastMouseRef.current = { x: e.clientX, y: e.clientY };
+                lastMouseRef.current = { x: lastEvent.clientX, y: lastEvent.clientY };
+                lastEvent = null;
                 rafId = null;
             });
         };
