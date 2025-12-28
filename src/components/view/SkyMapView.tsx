@@ -200,12 +200,12 @@ export const SkyMapView: React.FC<SkyMapViewProps> = ({
                 canvas.width = 512; canvas.height = 128;
                 const ctx = canvas.getContext('2d')!;
                 ctx.font = '900 48px Inter';
-                ctx.fillStyle = 'rgba(77, 238, 234, 0.6)'; // Base subtle opacity
+                ctx.fillStyle = 'rgba(77, 238, 234, 0.8)'; // Increased opacity from 0.6 to 0.8
                 ctx.textAlign = 'center';
                 ctx.letterSpacing = '10px';
                 ctx.fillText(c.name.toUpperCase(), 256, 64);
                 const tex = new THREE.CanvasTexture(canvas);
-                const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0.4 }));
+                const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0.6 })); // Increased from 0.4 to 0.6
                 sprite.scale.set(400, 100, 1);
                 sprite.position.copy(posA).multiplyScalar(1.1);
                 constellationGroup.add(sprite);

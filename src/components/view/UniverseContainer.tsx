@@ -36,6 +36,8 @@ export const UniverseContainer: React.FC<UniverseContainerProps> = ({
 }) => {
     const [isImmersion, setIsImmersion] = React.useState(false);
     const wrapperRef = React.useRef<HTMLDivElement>(null);
+    const isDraggingRef = React.useRef(false);
+    const lastMouseRef = React.useRef({ x: 0, y: 0 });
 
     const toggleImmersion = async () => {
         if (!wrapperRef.current) return;
@@ -66,6 +68,66 @@ export const UniverseContainer: React.FC<UniverseContainerProps> = ({
         document.addEventListener('fullscreenchange', handler);
         return () => document.removeEventListener('fullscreenchange', handler);
     }, []);
+
+    // Mouse drag controls for rotation and inclination
+    React.useEffect(() => {
+        const canvas = containerRef.current;
+        if (!canvas) return;
+
+        const handleMouseDown = (e: MouseEvent) => {
+            isDraggingRef.current = true;
+            lastMouseRef.current = { x: e.clientX, y: e.clientY };
+            canvas.style.cursor = 'grabbing';
+        };
+
+        const handleMouseMove = (e: MouseEvent) => {
+            if (!isDraggingRef.current) return;
+
+            const deltaX = e.clientX - lastMouseRef.current.x;
+            const deltaY = e.clientY - lastMouseRef.current.y;
+
+            // Update rotation (horizontal drag)
+            const rotationDelta = deltaX * 0.5;
+            let newRotation = orientation.rotation + rotationDelta;
+            
+            // Keep rotation in range -180 to 180
+            if (newRotation > 180) newRotation -= 360;
+            if (newRotation < -180) newRotation += 360;
+
+            // Update inclination (vertical drag)
+            const inclinationDelta = -deltaY * 0.3;
+            const newInclination = Math.max(0, Math.min(90, orientation.inclination + inclinationDelta));
+
+            setOrientation({
+                rotation: newRotation,
+                inclination: newInclination
+            });
+
+            lastMouseRef.current = { x: e.clientX, y: e.clientY };
+        };
+
+        const handleMouseUp = () => {
+            isDraggingRef.current = false;
+            canvas.style.cursor = 'move';
+        };
+
+        const handleMouseLeave = () => {
+            isDraggingRef.current = false;
+            canvas.style.cursor = 'move';
+        };
+
+        canvas.addEventListener('mousedown', handleMouseDown);
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseup', handleMouseUp);
+        canvas.addEventListener('mouseleave', handleMouseLeave);
+
+        return () => {
+            canvas.removeEventListener('mousedown', handleMouseDown);
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+            canvas.removeEventListener('mouseleave', handleMouseLeave);
+        };
+    }, [containerRef, orientation, setOrientation]);
 
     return (
         <div
