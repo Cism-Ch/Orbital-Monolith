@@ -21,7 +21,7 @@ export default function DashboardPage() {
         selectedBody: SOLAR_SYSTEM[0],
         searchQuery: '',
         isFocusMode: false,
-        orientation: { rotation: 0, inclination: 0.5 },
+        orientation: { rotation: 0, inclination: 10 },
         hoveredBody: null as CelestialBody | null,
         showGrid: false,
         showMilkyWay: true,

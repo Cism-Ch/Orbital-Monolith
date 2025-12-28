@@ -25,7 +25,7 @@ export const UniverseContainer: React.FC<UniverseContainerProps> = ({
     containerRef,
     orientation,
     setOrientation,
-    zoom,
+    zoom: _zoom, // Used by parent components for zoom state management
     setZoom,
     title,
     subtitle,
@@ -36,6 +36,10 @@ export const UniverseContainer: React.FC<UniverseContainerProps> = ({
 }) => {
     const [isImmersion, setIsImmersion] = React.useState(false);
     const wrapperRef = React.useRef<HTMLDivElement>(null);
+    const isDraggingRef = React.useRef(false);
+    const lastMouseRef = React.useRef({ x: 0, y: 0 });
+    const rafIdRef = React.useRef<number | null>(null);
+    const lastEventRef = React.useRef<MouseEvent | null>(null);
 
     const toggleImmersion = async () => {
         if (!wrapperRef.current) return;
@@ -66,6 +70,90 @@ export const UniverseContainer: React.FC<UniverseContainerProps> = ({
         document.addEventListener('fullscreenchange', handler);
         return () => document.removeEventListener('fullscreenchange', handler);
     }, []);
+
+    // Mouse drag controls for rotation and inclination
+    React.useEffect(() => {
+        const canvas = containerRef.current;
+        if (!canvas) return;
+
+        const handleMouseDown = (e: MouseEvent) => {
+            isDraggingRef.current = true;
+            lastMouseRef.current = { x: e.clientX, y: e.clientY };
+            canvas.style.cursor = 'grabbing';
+        };
+
+        // Throttled mouse move handler for better performance
+        const handleMouseMove = (e: MouseEvent) => {
+            if (!isDraggingRef.current) return;
+
+            // Store the latest event
+            lastEventRef.current = e;
+
+            // Use requestAnimationFrame for smooth performance
+            if (rafIdRef.current !== null) return;
+            
+            rafIdRef.current = requestAnimationFrame(() => {
+                const lastEvent = lastEventRef.current;
+                if (!lastEvent) {
+                    rafIdRef.current = null;
+                    return;
+                }
+
+                const deltaX = lastEvent.clientX - lastMouseRef.current.x;
+                const deltaY = lastEvent.clientY - lastMouseRef.current.y;
+
+                // 0.5 is an empirically chosen sensitivity factor converting horizontal pixels dragged
+                // into degrees of rotation; it keeps the interaction responsive without feeling too "twitchy".
+                const rotationDelta = deltaX * 0.5;
+                let newRotation = orientation.rotation + rotationDelta;
+                
+                // Wrap rotation into the range [-180, 180] degrees so it remains continuous for the viewer.
+                // Values above +180° are mapped by subtracting 360° (e.g. 190° → -170°),
+                // and values below -180° are mapped by adding 360° (e.g. -190° → 170°).
+                if (newRotation > 180) newRotation -= 360;
+                if (newRotation < -180) newRotation += 360;
+
+                // Update inclination (vertical drag)
+                // 0.3 is a lower sensitivity factor for inclination to make vertical tilts feel more controlled.
+                const inclinationDelta = -deltaY * 0.3;
+                // Clamp inclination to [0°, 90°] to avoid flipping the view over:
+                // 0° = top-down view, 90° = edge-on / horizon view.
+                const newInclination = Math.max(0, Math.min(90, orientation.inclination + inclinationDelta));
+
+                setOrientation({
+                    rotation: newRotation,
+                    inclination: newInclination
+                });
+
+                lastMouseRef.current = { x: lastEvent.clientX, y: lastEvent.clientY };
+                lastEventRef.current = null;
+                rafIdRef.current = null;
+            });
+        };
+
+        const handleMouseUp = () => {
+            isDraggingRef.current = false;
+            canvas.style.cursor = 'move';
+        };
+
+        const handleMouseLeave = () => {
+            isDraggingRef.current = false;
+            canvas.style.cursor = 'move';
+        };
+
+        canvas.addEventListener('mousedown', handleMouseDown);
+        window.addEventListener('mousemove', handleMouseMove, { passive: true });
+        window.addEventListener('mouseup', handleMouseUp);
+        canvas.addEventListener('mouseleave', handleMouseLeave);
+
+        return () => {
+            if (rafIdRef.current !== null) cancelAnimationFrame(rafIdRef.current);
+            canvas.removeEventListener('mousedown', handleMouseDown);
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+            canvas.removeEventListener('mouseleave', handleMouseLeave);
+        };
+    }, [containerRef, orientation, setOrientation]);
 
     return (
         <div
