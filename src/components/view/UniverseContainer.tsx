@@ -25,6 +25,7 @@ export const UniverseContainer: React.FC<UniverseContainerProps> = ({
     containerRef,
     orientation,
     setOrientation,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     zoom,
     setZoom,
     title,

@@ -71,7 +71,6 @@ export const SolarSystemView: React.FC<SolarSystemViewProps> = ({
 
         // 3. Celestial Grid Structure (for System)
         const gridGroup = new THREE.Group();
-        const gridMat = new THREE.LineBasicMaterial({ color: 0x4deeea, transparent: true, opacity: 0.05 });
         const ringGeo = new THREE.RingGeometry(180, 1500, 64);
         const gridMain = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: 0x4deeea, transparent: true, opacity: 0.02, side: THREE.DoubleSide }));
         gridMain.rotation.x = Math.PI / 2;
