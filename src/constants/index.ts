@@ -127,6 +127,15 @@ export const SOLAR_SYSTEM: CelestialBody[] = [
 export const STARS: CelestialBody[] = [
     // --- Nearby & Reference Stars ---
     { id: 'polaris', name: 'Polaris', scientificName: 'Alpha Ursae Minoris', type: CelestialType.STAR, distance: '433 ly', description: 'The North Star, a yellow supergiant serving as a stable navigation reference.', properties: { mass: '5.4 Sol', radius: '37.5 Sol', temp: '6,015 K', gravity: '0.1 m/s²' }, colors: ['#fff4e8', '#ffd2a1'], position: { x: 0, y: 900 } },
+    { id: 'kochab', name: 'Kochab', scientificName: 'Beta Ursae Minoris', type: CelestialType.STAR, distance: '130 ly', description: 'Orange giant in Ursa Minor, part of the Little Dipper.', properties: { mass: '1.3 Sol', radius: '42 Sol', temp: '4,030 K', gravity: '0.01 m/s²' }, colors: ['#ff8800', '#ff6600'], position: { x: -80, y: 850 } },
+    { id: 'pherkad', name: 'Pherkad', scientificName: 'Gamma Ursae Minoris', type: CelestialType.STAR, distance: '480 ly', description: 'White giant in Ursa Minor, one of the "Guardians of the Pole".', properties: { mass: '5 Sol', radius: '15 Sol', temp: '8,280 K', gravity: '0.5 m/s²' }, colors: ['#ffffff', '#aaddff'], position: { x: 80, y: 850 } },
+    { id: 'dubhe', name: 'Dubhe', scientificName: 'Alpha Ursae Majoris', type: CelestialType.STAR, distance: '123 ly', description: 'Orange giant in Ursa Major, pointer star of the Big Dipper.', properties: { mass: '4.25 Sol', radius: '30 Sol', temp: '4,660 K', gravity: '0.06 m/s²' }, colors: ['#ffaa44', '#ff8800'], position: { x: -150, y: 750 } },
+    { id: 'merak', name: 'Merak', scientificName: 'Beta Ursae Majoris', type: CelestialType.STAR, distance: '79 ly', description: 'White star in Ursa Major, second pointer star of the Big Dipper.', properties: { mass: '2.7 Sol', radius: '2.84 Sol', temp: '9,377 K', gravity: '1.2 m/s²' }, colors: ['#ffffff', '#aaddff'], position: { x: -100, y: 700 } },
+    { id: 'phecda', name: 'Phecda', scientificName: 'Gamma Ursae Majoris', type: CelestialType.STAR, distance: '84 ly', description: 'White star in Ursa Major, forms the bottom of the Big Dipper bowl.', properties: { mass: '2.94 Sol', radius: '3 Sol', temp: '9,355 K', gravity: '1.0 m/s²' }, colors: ['#ffffff', '#aaddff'], position: { x: -50, y: 650 } },
+    { id: 'megrez', name: 'Megrez', scientificName: 'Delta Ursae Majoris', type: CelestialType.STAR, distance: '81 ly', description: 'White star connecting the handle and bowl of the Big Dipper.', properties: { mass: '1.63 Sol', radius: '1.4 Sol', temp: '9,480 K', gravity: '2.0 m/s²' }, colors: ['#ffffff', '#aaddff'], position: { x: 0, y: 650 } },
+    { id: 'alioth', name: 'Alioth', scientificName: 'Epsilon Ursae Majoris', type: CelestialType.STAR, distance: '81 ly', description: 'Brightest star in Ursa Major, first star of the Big Dipper handle.', properties: { mass: '2.91 Sol', radius: '4.14 Sol', temp: '9,020 K', gravity: '0.7 m/s²' }, colors: ['#ffffff', '#aaddff'], position: { x: 50, y: 650 } },
+    { id: 'mizar', name: 'Mizar', scientificName: 'Zeta Ursae Majoris', type: CelestialType.STAR, distance: '83 ly', description: 'Famous binary star in Ursa Major, middle star of the handle.', properties: { mass: '2.2 Sol', radius: '2.4 Sol', temp: '9,000 K', gravity: '1.1 m/s²' }, colors: ['#ffffff', '#aaddff'], position: { x: 100, y: 630 } },
+    { id: 'alkaid', name: 'Alkaid', scientificName: 'Eta Ursae Majoris', type: CelestialType.STAR, distance: '104 ly', description: 'Blue star at the end of the Big Dipper handle.', properties: { mass: '6.1 Sol', radius: '3.4 Sol', temp: '15,540 K', gravity: '1.5 m/s²' }, colors: ['#aaddff', '#44aaff'], position: { x: 150, y: 600 } },
     { id: 'proxima', name: 'Proxima Centauri', scientificName: 'Alpha Centauri C', type: CelestialType.STAR, distance: '4.24 ly', description: 'The closest known star to the Sun. A low-mass red dwarf.', properties: { mass: '0.12 Sol', radius: '0.15 Sol', temp: '3,042 K', gravity: '0.04 m/s²' }, colors: ['#ff6633', '#662200'], position: { x: -450, y: -250 } },
     { id: 'sirius', name: 'Sirius', scientificName: 'Alpha Canis Majoris', type: CelestialType.STAR, distance: '8.6 ly', description: 'The brightest star in Earth\'s night sky.', properties: { mass: '2.02 Sol', radius: '1.71 Sol', temp: '9,940 K', gravity: '0.8 m/s²' }, colors: ['#ffffff', '#aaddff'], position: { x: 200, y: -450 } },
 
@@ -172,6 +181,20 @@ export const STARS: CelestialBody[] = [
 ];
 
 export const CONSTELLATIONS = [
+    {
+        id: 'ursa_minor',
+        name: 'Ursa Minor',
+        description: 'The Little Bear. Contains Polaris, the North Star.',
+        astronomicalContext: 'Circumpolar constellation used for navigation. The Little Dipper asterism.',
+        connections: [['polaris', 'kochab'], ['polaris', 'pherkad'], ['kochab', 'pherkad']]
+    },
+    {
+        id: 'ursa_major',
+        name: 'Ursa Major',
+        description: 'The Great Bear. Most recognizable constellation in the northern sky.',
+        astronomicalContext: 'Contains the Big Dipper asterism, one of the most familiar star patterns.',
+        connections: [['dubhe', 'merak'], ['merak', 'phecda'], ['phecda', 'megrez'], ['megrez', 'alioth'], ['alioth', 'mizar'], ['mizar', 'alkaid'], ['megrez', 'dubhe']]
+    },
     {
         id: 'cepheus',
         name: 'Cepheus',

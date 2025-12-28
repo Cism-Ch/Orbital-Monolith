@@ -139,17 +139,17 @@ export const SolarSystemView: React.FC<SolarSystemViewProps> = ({
             else orbitRadius = (idx - 4) * 120 + 550;
 
             const orbitGeo = new THREE.RingGeometry(orbitRadius - 0.7, orbitRadius + 0.7, 128);
-            const orbitRing = new THREE.Mesh(orbitGeo, new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.1, side: THREE.DoubleSide }));
+            const orbitRing = new THREE.Mesh(orbitGeo, new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.15, side: THREE.DoubleSide })); // Increased from 0.1 to 0.15
             orbitRing.rotation.x = Math.PI / 2;
             scene.add(orbitRing);
 
-            const size = 11 + idx * 1.5;
+            const size = 12 + idx * 2.0; // Increased from 11 + idx * 1.5
             const pMesh = new THREE.Mesh(
                 new THREE.SphereGeometry(size, 32, 32),
                 new THREE.MeshStandardMaterial({
                     color: new THREE.Color(planet.colors[0]),
                     emissive: new THREE.Color(planet.colors[0]),
-                    emissiveIntensity: 0.8 // Increased visibility
+                    emissiveIntensity: 1.2 // Increased from 0.8 for better visibility
                 })
             );
             pMesh.userData = { body: planet };
@@ -157,7 +157,7 @@ export const SolarSystemView: React.FC<SolarSystemViewProps> = ({
 
             const pGlow = new THREE.Mesh(
                 new THREE.SphereGeometry(size * 1.7, 16, 16),
-                new THREE.MeshBasicMaterial({ color: new THREE.Color(planet.colors[0]), transparent: true, opacity: 0.05, blending: THREE.AdditiveBlending })
+                new THREE.MeshBasicMaterial({ color: new THREE.Color(planet.colors[0]), transparent: true, opacity: 0.08, blending: THREE.AdditiveBlending }) // Increased from 0.05
             );
             scene.add(pGlow);
 
