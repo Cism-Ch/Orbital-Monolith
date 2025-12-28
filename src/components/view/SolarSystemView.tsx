@@ -142,7 +142,33 @@ export const SolarSystemView: React.FC<SolarSystemViewProps> = ({
             orbitRing.rotation.x = Math.PI / 2;
             scene.add(orbitRing);
 
-            const size = 12 + idx * 2.0; // Increased from 11 + idx * 1.5
+            // Calculate planet size based on actual physical radius data
+            // Extract radius from properties string (e.g., "6,371 km" -> 6371)
+            const radiusStr = planet.properties.radius || '';
+            const radiusMatch = radiusStr.match(/[\d,]+/);
+            const planetRadiusKm = radiusMatch ? parseFloat(radiusMatch[0].replace(/,/g, '')) : 0;
+            
+            // Earth's radius as reference (6,371 km)
+            const earthRadiusKm = 6371;
+            
+            let size: number;
+            if (planetRadiusKm > 0) {
+                // Use logarithmic scaling to make size differences visible but not extreme
+                // Base size range: 8 to 28 units
+                const minSize = 8;
+                const maxSize = 28;
+                const ratio = planetRadiusKm / earthRadiusKm;
+                
+                // Logarithmic scale helps compress the huge range (Jupiter is 11x Earth's radius)
+                // while keeping smaller planets distinguishable
+                const logRatio = Math.log(ratio + 0.5) / Math.log(12); // normalize to ~[0, 1] range
+                const clampedRatio = Math.max(0, Math.min(1, logRatio));
+                size = minSize + (maxSize - minSize) * clampedRatio;
+            } else {
+                // Fallback to index-based sizing if radius data is missing
+                size = 12 + idx * 2.0;
+            }
+
             const pMesh = new THREE.Mesh(
                 new THREE.SphereGeometry(size, 32, 32),
                 new THREE.MeshStandardMaterial({

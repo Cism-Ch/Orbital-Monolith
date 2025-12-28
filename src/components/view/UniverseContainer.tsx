@@ -38,6 +38,8 @@ export const UniverseContainer: React.FC<UniverseContainerProps> = ({
     const wrapperRef = React.useRef<HTMLDivElement>(null);
     const isDraggingRef = React.useRef(false);
     const lastMouseRef = React.useRef({ x: 0, y: 0 });
+    const rafIdRef = React.useRef<number | null>(null);
+    const lastEventRef = React.useRef<MouseEvent | null>(null);
 
     const toggleImmersion = async () => {
         if (!wrapperRef.current) return;
@@ -81,37 +83,41 @@ export const UniverseContainer: React.FC<UniverseContainerProps> = ({
         };
 
         // Throttled mouse move handler for better performance
-        let rafId: number | null = null;
-        let lastEvent: MouseEvent | null = null;
-        
         const handleMouseMove = (e: MouseEvent) => {
             if (!isDraggingRef.current) return;
 
             // Store the latest event
-            lastEvent = e;
+            lastEventRef.current = e;
 
             // Use requestAnimationFrame for smooth performance
-            if (rafId !== null) return;
+            if (rafIdRef.current !== null) return;
             
-            rafId = requestAnimationFrame(() => {
+            rafIdRef.current = requestAnimationFrame(() => {
+                const lastEvent = lastEventRef.current;
                 if (!lastEvent) {
-                    rafId = null;
+                    rafIdRef.current = null;
                     return;
                 }
 
                 const deltaX = lastEvent.clientX - lastMouseRef.current.x;
                 const deltaY = lastEvent.clientY - lastMouseRef.current.y;
 
-                // Update rotation (horizontal drag)
+                // 0.5 is an empirically chosen sensitivity factor converting horizontal pixels dragged
+                // into degrees of rotation; it keeps the interaction responsive without feeling too "twitchy".
                 const rotationDelta = deltaX * 0.5;
                 let newRotation = orientation.rotation + rotationDelta;
                 
-                // Keep rotation in range -180 to 180
+                // Wrap rotation into the range [-180, 180] degrees so it remains continuous for the viewer.
+                // Values above +180° are mapped by subtracting 360° (e.g. 190° → -170°),
+                // and values below -180° are mapped by adding 360° (e.g. -190° → 170°).
                 if (newRotation > 180) newRotation -= 360;
                 if (newRotation < -180) newRotation += 360;
 
                 // Update inclination (vertical drag)
+                // 0.3 is a lower sensitivity factor for inclination to make vertical tilts feel more controlled.
                 const inclinationDelta = -deltaY * 0.3;
+                // Clamp inclination to [0°, 90°] to avoid flipping the view over:
+                // 0° = top-down view, 90° = edge-on / horizon view.
                 const newInclination = Math.max(0, Math.min(90, orientation.inclination + inclinationDelta));
 
                 setOrientation({
@@ -120,8 +126,8 @@ export const UniverseContainer: React.FC<UniverseContainerProps> = ({
                 });
 
                 lastMouseRef.current = { x: lastEvent.clientX, y: lastEvent.clientY };
-                lastEvent = null;
-                rafId = null;
+                lastEventRef.current = null;
+                rafIdRef.current = null;
             });
         };
 
@@ -141,7 +147,7 @@ export const UniverseContainer: React.FC<UniverseContainerProps> = ({
         canvas.addEventListener('mouseleave', handleMouseLeave);
 
         return () => {
-            if (rafId !== null) cancelAnimationFrame(rafId);
+            if (rafIdRef.current !== null) cancelAnimationFrame(rafIdRef.current);
             canvas.removeEventListener('mousedown', handleMouseDown);
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('mouseup', handleMouseUp);
