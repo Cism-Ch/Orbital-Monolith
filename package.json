@@ -1,0 +1,42 @@
+{
+  "name": "celestial-orbital-monolith-v2",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "autoprefixer": "^10.4.23",
+    "clsx": "^2.1.1",
+    "framer-motion": "11.15.0",
+    "lucide-react": "0.460.0",
+    "next": "^16.1.1",
+    "postcss": "^8.5.6",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "tailwind-merge": "^3.4.0",
+    "tailwindcss": "^4.1.18",
+    "three": "0.170.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.2.0",
+    "@eslint/js": "^9.15.0",
+    "@types/node": "^22.19.3",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@types/three": "^0.182.0",
+    "@typescript-eslint/eslint-plugin": "^8.50.1",
+    "@typescript-eslint/parser": "^8.50.1",
+    "eslint": "^9.15.0",
+    "eslint-config-next": "^15.0.3",
+    "globals": "^16.5.0",
+    "typescript": "~5.8.2",
+    "typescript-eslint": "^8.15.0"
+  }
+}

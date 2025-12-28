@@ -1,0 +1,7 @@
+{
+  "name": "Celestial Orbital Monolith v2",
+  "description": "An interactive solar system and star map dashboard featuring dynamic UI accents, keyboard navigation, and celestial distance measurement tools.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
