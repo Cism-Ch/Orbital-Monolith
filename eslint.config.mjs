@@ -34,6 +34,7 @@ export default [
             "@typescript-eslint/no-explicit-any": "off",
             "no-undef": "error",
             "@next/next/no-img-element": "off",
+            "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
         },
     },
     {

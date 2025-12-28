@@ -25,8 +25,7 @@ export const UniverseContainer: React.FC<UniverseContainerProps> = ({
     containerRef,
     orientation,
     setOrientation,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    zoom,
+    zoom: _zoom, // Used by parent components for zoom state management
     setZoom,
     title,
     subtitle,
@@ -81,30 +80,38 @@ export const UniverseContainer: React.FC<UniverseContainerProps> = ({
             canvas.style.cursor = 'grabbing';
         };
 
+        // Throttled mouse move handler for better performance
+        let rafId: number | null = null;
         const handleMouseMove = (e: MouseEvent) => {
             if (!isDraggingRef.current) return;
 
-            const deltaX = e.clientX - lastMouseRef.current.x;
-            const deltaY = e.clientY - lastMouseRef.current.y;
-
-            // Update rotation (horizontal drag)
-            const rotationDelta = deltaX * 0.5;
-            let newRotation = orientation.rotation + rotationDelta;
+            // Use requestAnimationFrame for smooth performance
+            if (rafId !== null) return;
             
-            // Keep rotation in range -180 to 180
-            if (newRotation > 180) newRotation -= 360;
-            if (newRotation < -180) newRotation += 360;
+            rafId = requestAnimationFrame(() => {
+                const deltaX = e.clientX - lastMouseRef.current.x;
+                const deltaY = e.clientY - lastMouseRef.current.y;
 
-            // Update inclination (vertical drag)
-            const inclinationDelta = -deltaY * 0.3;
-            const newInclination = Math.max(0, Math.min(90, orientation.inclination + inclinationDelta));
+                // Update rotation (horizontal drag)
+                const rotationDelta = deltaX * 0.5;
+                let newRotation = orientation.rotation + rotationDelta;
+                
+                // Keep rotation in range -180 to 180
+                if (newRotation > 180) newRotation -= 360;
+                if (newRotation < -180) newRotation += 360;
 
-            setOrientation({
-                rotation: newRotation,
-                inclination: newInclination
+                // Update inclination (vertical drag)
+                const inclinationDelta = -deltaY * 0.3;
+                const newInclination = Math.max(0, Math.min(90, orientation.inclination + inclinationDelta));
+
+                setOrientation({
+                    rotation: newRotation,
+                    inclination: newInclination
+                });
+
+                lastMouseRef.current = { x: e.clientX, y: e.clientY };
+                rafId = null;
             });
-
-            lastMouseRef.current = { x: e.clientX, y: e.clientY };
         };
 
         const handleMouseUp = () => {
@@ -118,11 +125,12 @@ export const UniverseContainer: React.FC<UniverseContainerProps> = ({
         };
 
         canvas.addEventListener('mousedown', handleMouseDown);
-        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mousemove', handleMouseMove, { passive: true });
         window.addEventListener('mouseup', handleMouseUp);
         canvas.addEventListener('mouseleave', handleMouseLeave);
 
         return () => {
+            if (rafId !== null) cancelAnimationFrame(rafId);
             canvas.removeEventListener('mousedown', handleMouseDown);
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('mouseup', handleMouseUp);
