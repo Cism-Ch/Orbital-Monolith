@@ -35,10 +35,11 @@ export const SkyMapView: React.FC<SkyMapViewProps> = ({
     const [showConstellations, setShowConstellations] = useState(true);
     const [constInfo, setConstInfo] = useState<any | null>(null);
     const { containerRef, scene, registerAnimation, renderer, camera } = useUniverseEngine({ cameraFov: 60 });
+    const isBrowser = typeof document !== 'undefined';
 
     const skyObjects = useMemo(() => {
-        const isBrowser = typeof document !== 'undefined';
         scene.clear();
+        const fallbackLabelMaterial = new THREE.SpriteMaterial({ transparent: true, opacity: 0 });
 
         // 1. Static Starfield (Distant Background)
         const starCount = 15000;
@@ -157,7 +158,7 @@ export const SkyMapView: React.FC<SkyMapViewProps> = ({
             group.add(glow);
 
             // Premium Label (Contextual)
-            let labelMaterial = new THREE.SpriteMaterial({ transparent: true, opacity: 0 });
+            let labelMaterial = fallbackLabelMaterial;
             if (isBrowser) {
                 const canvas = document.createElement('canvas');
                 canvas.width = 256; canvas.height = 64;
