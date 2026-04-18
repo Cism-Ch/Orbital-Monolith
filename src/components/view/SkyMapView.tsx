@@ -157,9 +157,7 @@ export const SkyMapView: React.FC<SkyMapViewProps> = ({
             group.add(glow);
 
             // Premium Label (Contextual)
-            const labelSprite = new THREE.Sprite(
-                new THREE.SpriteMaterial({ transparent: true, opacity: 0 })
-            );
+            let labelMaterial = new THREE.SpriteMaterial({ transparent: true, opacity: 0 });
             if (isBrowser) {
                 const canvas = document.createElement('canvas');
                 canvas.width = 256; canvas.height = 64;
@@ -170,8 +168,9 @@ export const SkyMapView: React.FC<SkyMapViewProps> = ({
                 ctx.shadowBlur = 4; ctx.shadowColor = 'rgba(0,0,0,0.5)';
                 ctx.fillText(star.name.toLowerCase(), 10, 40);
                 const labelTex = new THREE.CanvasTexture(canvas);
-                labelSprite.material = new THREE.SpriteMaterial({ map: labelTex, transparent: true, opacity: 0 });
+                labelMaterial = new THREE.SpriteMaterial({ map: labelTex, transparent: true, opacity: 0 });
             }
+            const labelSprite = new THREE.Sprite(labelMaterial);
             labelSprite.scale.set(120, 30, 1);
             labelSprite.position.set(20, -10, 0);
             group.add(labelSprite);

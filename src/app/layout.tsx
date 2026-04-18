@@ -13,7 +13,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-            <body className="[--font-sans:ui-sans-serif] [--font-mono:ui-monospace] antialiased font-sans">
+            <body className="antialiased font-sans">
                 <div className="grain" />
                 <div className="scanline" />
                 {children}
