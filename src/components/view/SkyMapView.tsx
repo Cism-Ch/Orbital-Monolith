@@ -37,7 +37,10 @@ export const SkyMapView: React.FC<SkyMapViewProps> = ({
     const [showConstellations, setShowConstellations] = useState(true);
     const [constInfo, setConstInfo] = useState<any | null>(null);
     const { containerRef, scene, registerAnimation, renderer, camera } = useUniverseEngine({ cameraFov: 60 });
-    const fallbackLabelMaterialRef = useRef<THREE.SpriteMaterial>(new THREE.SpriteMaterial({ transparent: true, opacity: 0 }));
+    const fallbackLabelMaterialRef = useRef<THREE.SpriteMaterial | null>(null);
+    if (!fallbackLabelMaterialRef.current) {
+        fallbackLabelMaterialRef.current = new THREE.SpriteMaterial({ transparent: true, opacity: 0 });
+    }
 
     const skyObjects = useMemo(() => {
         scene.clear();
@@ -159,19 +162,20 @@ export const SkyMapView: React.FC<SkyMapViewProps> = ({
             group.add(glow);
 
             // Premium Label (Contextual)
-            let labelMaterial = fallbackLabelMaterialRef.current;
-            if (IS_BROWSER) {
-                const canvas = document.createElement('canvas');
-                canvas.width = 256; canvas.height = 64;
-                const ctx = canvas.getContext('2d')!;
-                ctx.font = '24px Inter';
-                ctx.fillStyle = 'white';
-                ctx.textAlign = 'left';
-                ctx.shadowBlur = 4; ctx.shadowColor = 'rgba(0,0,0,0.5)';
-                ctx.fillText(star.name.toLowerCase(), 10, 40);
-                const labelTex = new THREE.CanvasTexture(canvas);
-                labelMaterial = new THREE.SpriteMaterial({ map: labelTex, transparent: true, opacity: 0 });
-            }
+            const labelMaterial = IS_BROWSER
+                ? (() => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 256; canvas.height = 64;
+                    const ctx = canvas.getContext('2d')!;
+                    ctx.font = '24px Inter';
+                    ctx.fillStyle = 'white';
+                    ctx.textAlign = 'left';
+                    ctx.shadowBlur = 4; ctx.shadowColor = 'rgba(0,0,0,0.5)';
+                    ctx.fillText(star.name.toLowerCase(), 10, 40);
+                    const labelTex = new THREE.CanvasTexture(canvas);
+                    return new THREE.SpriteMaterial({ map: labelTex, transparent: true, opacity: 0 });
+                })()
+                : fallbackLabelMaterialRef.current!;
             const labelSprite = new THREE.Sprite(labelMaterial);
             labelSprite.scale.set(120, 30, 1);
             labelSprite.position.set(20, -10, 0);
