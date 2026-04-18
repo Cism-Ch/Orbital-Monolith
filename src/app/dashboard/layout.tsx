@@ -9,7 +9,6 @@ import {
     Settings,
     Bell,
     Search,
-    User,
     LogOut,
     Activity
 } from 'lucide-react';

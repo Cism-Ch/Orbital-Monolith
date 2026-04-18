@@ -6,12 +6,10 @@ import { SolarSystemView } from '@/components/view/SolarSystemView';
 import { SkyMapView } from '@/components/view/SkyMapView';
 import { CelestialBody } from '@/types';
 import { SOLAR_SYSTEM } from '@/constants';
-import { calculateDistance, searchCelestial } from '@/services/celestialService';
-import { Info, Sparkles, Activity, ShieldCheck, Zap } from 'lucide-react';
-import { useClock } from '@/hooks/useClock';
+import { calculateDistance } from '@/services/celestialService';
+import { Sparkles, Zap } from 'lucide-react';
 import { useAccentColors } from '@/hooks/useAccentColors';
 import { TelemetryStream } from '@/components/ui/TelemetryStream';
-import { ControlPanel } from '@/components/ui/ControlPanel';
 import { AstrometricalBridge } from '@/components/ui/AstrometricalBridge';
 import { FocusView } from '@/components/ui/FocusView';
 
@@ -27,13 +25,7 @@ export default function DashboardPage() {
         showMilkyWay: true,
     });
 
-    const time = useClock();
     useAccentColors(state.selectedBody, state.hoveredBody);
-
-    const searchResults = useMemo(() =>
-        searchCelestial(state.searchQuery),
-        [state.searchQuery]
-    );
 
     const distanceToEarth = useMemo(() =>
         calculateDistance(state.selectedBody, SOLAR_SYSTEM[2]),

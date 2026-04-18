@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { SkyMapView } from '@/components/view/SkyMapView';
 import { CelestialBody } from '@/types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Compass, Info, Sparkles } from 'lucide-react';
+import { Compass, Sparkles } from 'lucide-react';
 
 export default function MapPage() {
     const [state, setState] = useState({

@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Sparkles, Database, Zap, Activity, ShieldCheck, Globe, Star } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { X, Sparkles, Database, Zap, Activity, ShieldCheck, Globe } from 'lucide-react';
 import { CelestialBody } from '@/types';
 import { TelemetryStream } from './TelemetryStream';
 
