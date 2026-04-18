@@ -38,8 +38,14 @@ export const SkyMapView: React.FC<SkyMapViewProps> = ({
     const [constInfo, setConstInfo] = useState<any | null>(null);
     const { containerRef, scene, registerAnimation, renderer, camera } = useUniverseEngine({ cameraFov: 60 });
     const fallbackLabelMaterialRef = useRef<THREE.SpriteMaterial | null>(null);
+    // Lazily initialize once using useMemo so it is only created on first render,
+    // not on every re-render as a bare conditional in the component body would do.
+    const fallbackLabelMaterial = useMemo(
+        () => new THREE.SpriteMaterial({ transparent: true, opacity: 0 }),
+        []
+    );
     if (!fallbackLabelMaterialRef.current) {
-        fallbackLabelMaterialRef.current = new THREE.SpriteMaterial({ transparent: true, opacity: 0 });
+        fallbackLabelMaterialRef.current = fallbackLabelMaterial;
     }
 
     const skyObjects = useMemo(() => {

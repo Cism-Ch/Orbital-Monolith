@@ -104,6 +104,8 @@ export default function SettingsPage() {
                                         <input
                                             type="range"
                                             className="slider-pill"
+                                            min={0}
+                                            max={100}
                                             value={opt.value as number}
                                             onChange={(e) => updateOption(sIdx, oIdx, parseInt(e.target.value))}
                                         />

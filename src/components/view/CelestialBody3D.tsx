@@ -18,9 +18,13 @@ export const CelestialBody3D: React.FC<CelestialBody3DProps> = ({ body, size = 3
     const isHoveredRef = useRef(false);
     const onClickRef = useRef(onClick);
 
-    // Keep refs in sync with latest prop/state values without re-running the effect
-    useEffect(() => { isHoveredRef.current = isHovered; }, [isHovered]);
-    useEffect(() => { onClickRef.current = onClick; }, [onClick]);
+    // Keep refs in sync with the latest prop/state values without triggering
+    // the main Three.js setup effect. A single combined effect is used to
+    // avoid two separate effect executions on every render.
+    useEffect(() => {
+        isHoveredRef.current = isHovered;
+        onClickRef.current = onClick;
+    }, [isHovered, onClick]);
 
     useEffect(() => {
         if (!containerRef.current) return;
