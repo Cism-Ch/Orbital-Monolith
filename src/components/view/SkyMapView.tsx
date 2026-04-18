@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { STARS, CONSTELLATIONS } from '@/constants';
 import { CelestialBody } from '@/types';
@@ -21,6 +21,8 @@ interface SkyMapViewProps {
     setShowMilkyWay: (v: boolean) => void;
 }
 
+const IS_BROWSER = typeof window !== 'undefined';
+
 export const SkyMapView: React.FC<SkyMapViewProps> = ({
     onSelect,
     onHover,
@@ -35,11 +37,10 @@ export const SkyMapView: React.FC<SkyMapViewProps> = ({
     const [showConstellations, setShowConstellations] = useState(true);
     const [constInfo, setConstInfo] = useState<any | null>(null);
     const { containerRef, scene, registerAnimation, renderer, camera } = useUniverseEngine({ cameraFov: 60 });
-    const isBrowser = typeof document !== 'undefined';
+    const fallbackLabelMaterialRef = useRef<THREE.SpriteMaterial>(new THREE.SpriteMaterial({ transparent: true, opacity: 0 }));
 
     const skyObjects = useMemo(() => {
         scene.clear();
-        const fallbackLabelMaterial = new THREE.SpriteMaterial({ transparent: true, opacity: 0 });
 
         // 1. Static Starfield (Distant Background)
         const starCount = 15000;
@@ -109,7 +110,7 @@ export const SkyMapView: React.FC<SkyMapViewProps> = ({
         scene.add(mwPoints);
 
         // 4. Cardinal Points
-        if (isBrowser) {
+        if (IS_BROWSER) {
             const cardinals = [
                 { label: 'N', pos: [0, 0, -3200] }, { label: 'S', pos: [0, 0, 3200] },
                 { label: 'E', pos: [3200, 0, 0] }, { label: 'W', pos: [-3200, 0, 0] }
@@ -158,8 +159,8 @@ export const SkyMapView: React.FC<SkyMapViewProps> = ({
             group.add(glow);
 
             // Premium Label (Contextual)
-            let labelMaterial = fallbackLabelMaterial;
-            if (isBrowser) {
+            let labelMaterial = fallbackLabelMaterialRef.current;
+            if (IS_BROWSER) {
                 const canvas = document.createElement('canvas');
                 canvas.width = 256; canvas.height = 64;
                 const ctx = canvas.getContext('2d')!;
@@ -202,7 +203,7 @@ export const SkyMapView: React.FC<SkyMapViewProps> = ({
             constellationLines.push({ mesh: lines, data: c });
 
             // Constellation Label (MAJUSCULES)
-            if (isBrowser && c.connections.length > 0) {
+            if (IS_BROWSER && c.connections.length > 0) {
                 const posA = starPositionsMap.get(c.connections[0][0])!;
                 const canvas = document.createElement('canvas');
                 canvas.width = 512; canvas.height = 128;
