@@ -49,6 +49,9 @@ export function useUniverseEngine(options: UniverseEngineOptions = {}) {
                 options.cameraNear || 0.1,
                 options.cameraFar || 20000
             );
+            // Place the camera at the expected zoom=1 position so the scene is
+            // immediately visible instead of appearing after the first lerp cycle.
+            camera.position.z = options.cameraFov === 60 ? 1500 : 1200;
             cameraRef.current = camera;
         }
 

@@ -8,7 +8,7 @@ export const TelemetryStream: React.FC = () => {
     const logs = useTelemetry();
 
     return (
-        <div className="flex flex-col gap-3 font-mono h-full overflow-hidden">
+        <div className="flex flex-col gap-3 font-mono h-full overflow-hidden relative">
             <AnimatePresence mode="popLayout" initial={false}>
                 {logs.slice(-12).map((log) => (
                     <motion.div

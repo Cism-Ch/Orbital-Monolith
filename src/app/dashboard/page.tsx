@@ -134,8 +134,12 @@ export default function DashboardPage() {
                             <span className="font-mono text-white font-bold">{state.selectedBody.properties.mass}</span>
                         </div>
                         <div className="bg-white/5 p-4 rounded-2xl">
-                            <span className="text-[9px] uppercase text-[#6c6c7a] font-black block mb-1">Magnitude</span>
-                            <span className="font-mono text-white font-bold">{state.selectedBody.properties.magnitude}</span>
+                            <span className="text-[9px] uppercase text-[#6c6c7a] font-black block mb-1">
+                                {state.selectedBody.properties.period ? 'Orbital Period' : 'Temperature'}
+                            </span>
+                            <span className="font-mono text-white font-bold">
+                                {state.selectedBody.properties.period ?? state.selectedBody.properties.temp}
+                            </span>
                         </div>
                     </div>
 

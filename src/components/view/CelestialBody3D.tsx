@@ -13,6 +13,14 @@ interface CelestialBody3DProps {
 export const CelestialBody3D: React.FC<CelestialBody3DProps> = ({ body, size = 300, onClick }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [isHovered, setIsHovered] = useState(false);
+    // Use a ref so the animation loop always reads the latest hover state
+    // without triggering a full Three.js scene re-initialization.
+    const isHoveredRef = useRef(false);
+    const onClickRef = useRef(onClick);
+
+    // Keep refs in sync with latest prop/state values without re-running the effect
+    useEffect(() => { isHoveredRef.current = isHovered; }, [isHovered]);
+    useEffect(() => { onClickRef.current = onClick; }, [onClick]);
 
     useEffect(() => {
         if (!containerRef.current) return;
@@ -119,15 +127,16 @@ export const CelestialBody3D: React.FC<CelestialBody3DProps> = ({ body, size = 3
         const onLocalClick = () => {
             raycaster.setFromCamera(mouse, camera);
             const intersects = raycaster.intersectObject(sphere);
-            if (intersects.length > 0 && onClick) {
-                onClick();
+            if (intersects.length > 0 && onClickRef.current) {
+                onClickRef.current();
             }
         };
 
         renderer.domElement.addEventListener('mousemove', onMouseMove);
         renderer.domElement.addEventListener('click', onLocalClick);
 
-        // Animation
+        // Animation — reads isHoveredRef instead of the captured `isHovered` state
+        // so that hover changes never trigger a full scene re-initialization.
         let animationFrameId: number;
         const animate = () => {
             animationFrameId = requestAnimationFrame(animate);
@@ -135,21 +144,22 @@ export const CelestialBody3D: React.FC<CelestialBody3DProps> = ({ body, size = 3
             sphere.rotation.y += 0.0015;
 
             const elapsed = Date.now() * 0.001;
+            const hovered = isHoveredRef.current;
             glowMaterial.uniforms.time.value = elapsed;
 
             const pulseBase = body.type === 'STAR' ? 1.02 : 0.98;
-            const pulseAmp = isHovered ? 0.04 : 0.015;
+            const pulseAmp = hovered ? 0.04 : 0.015;
             const pulse = pulseBase + Math.sin(elapsed * 0.8) * pulseAmp;
 
             glowMesh.scale.set(pulse, pulse, pulse);
 
             glowMaterial.uniforms.hoverIntensity.value = THREE.MathUtils.lerp(
                 glowMaterial.uniforms.hoverIntensity.value,
-                isHovered ? 1.0 : 0.0,
+                hovered ? 1.0 : 0.0,
                 0.03
             );
 
-            const targetEmissive = (body.type === 'STAR' ? 0.7 : 0.15) + (isHovered ? 0.3 : 0);
+            const targetEmissive = (body.type === 'STAR' ? 0.7 : 0.15) + (hovered ? 0.3 : 0);
             material.emissiveIntensity = THREE.MathUtils.lerp(material.emissiveIntensity, targetEmissive, 0.03);
 
             renderer.render(scene, camera);
@@ -170,7 +180,9 @@ export const CelestialBody3D: React.FC<CelestialBody3DProps> = ({ body, size = 3
                 containerRef.current.removeChild(renderer.domElement);
             }
         };
-    }, [body, size, isHovered, onClick]);
+    // isHovered intentionally excluded: hover state is read via isHoveredRef
+    // to avoid destroying and rebuilding the Three.js scene on every hover.
+    }, [body, size]);
 
     return (
         <div

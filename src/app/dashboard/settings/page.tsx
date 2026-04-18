@@ -1,11 +1,23 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Settings, Eye, Volume2, Shield, Cpu, RefreshCcw } from 'lucide-react';
 
+interface SettingOption {
+    label: string;
+    type: 'toggle' | 'slider';
+    value: boolean | number;
+}
+
+interface SettingSection {
+    title: string;
+    icon: React.ElementType;
+    options: SettingOption[];
+}
+
 export default function SettingsPage() {
-    const sections = [
+    const initialSections: SettingSection[] = [
         {
             title: 'Visual Core',
             icon: Eye,
@@ -33,6 +45,18 @@ export default function SettingsPage() {
         }
     ];
 
+    const [sections, setSections] = useState<SettingSection[]>(initialSections);
+
+    const updateOption = (sIdx: number, oIdx: number, newValue: boolean | number) => {
+        setSections(prev => {
+            const next = prev.map((s, si) => si !== sIdx ? s : {
+                ...s,
+                options: s.options.map((o, oi) => oi !== oIdx ? o : { ...o, value: newValue })
+            });
+            return next;
+        });
+    };
+
     return (
         <div className="w-full h-full p-4 flex flex-col gap-8 max-w-5xl mx-auto">
             <div className="flex flex-col gap-2 px-4">
@@ -44,12 +68,12 @@ export default function SettingsPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-4 pb-12">
-                {sections.map((section, idx) => (
+                {sections.map((section, sIdx) => (
                     <motion.div
                         key={section.title}
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: idx * 0.1 }}
+                        transition={{ delay: sIdx * 0.1 }}
                         className="monolith-panel !rounded-[3rem] p-8 space-y-8"
                     >
                         <div className="flex items-center gap-4">
@@ -60,12 +84,16 @@ export default function SettingsPage() {
                         </div>
 
                         <div className="space-y-6">
-                            {section.options.map((opt) => (
+                            {section.options.map((opt, oIdx) => (
                                 <div key={opt.label} className="flex flex-col gap-3">
                                     <div className="flex items-center justify-between">
                                         <span className="text-[10px] font-black text-[#6c6c7a] uppercase tracking-widest">{opt.label}</span>
                                         {opt.type === 'toggle' ? (
-                                            <button className={`w-12 h-6 rounded-full p-1 transition-colors ${opt.value ? 'bg-[var(--accent-primary)]' : 'bg-white/10'}`}>
+                                            <button
+                                                onClick={() => updateOption(sIdx, oIdx, !opt.value)}
+                                                className={`w-12 h-6 rounded-full p-1 transition-colors ${opt.value ? 'bg-[var(--accent-primary)]' : 'bg-white/10'}`}
+                                                aria-pressed={!!opt.value}
+                                            >
                                                 <div className={`w-4 h-4 rounded-full bg-black transition-transform ${opt.value ? 'translate-x-6' : 'translate-x-0'}`} />
                                             </button>
                                         ) : (
@@ -73,7 +101,12 @@ export default function SettingsPage() {
                                         )}
                                     </div>
                                     {opt.type === 'slider' && (
-                                        <input type="range" className="slider-pill" defaultValue={opt.value as number} />
+                                        <input
+                                            type="range"
+                                            className="slider-pill"
+                                            value={opt.value as number}
+                                            onChange={(e) => updateOption(sIdx, oIdx, parseInt(e.target.value))}
+                                        />
                                     )}
                                 </div>
                             ))}
@@ -96,7 +129,10 @@ export default function SettingsPage() {
                             Last calibration: 2.5 hours ago
                         </p>
                     </div>
-                    <button className="flex items-center gap-3 px-8 py-3 rounded-full bg-white/5 border border-white/10 text-[9px] font-black uppercase text-white hover:bg-[var(--accent-primary)] hover:text-black transition-all">
+                    <button
+                        onClick={() => setSections(initialSections)}
+                        className="flex items-center gap-3 px-8 py-3 rounded-full bg-white/5 border border-white/10 text-[9px] font-black uppercase text-white hover:bg-[var(--accent-primary)] hover:text-black transition-all"
+                    >
                         <RefreshCcw size={14} /> Re-Sync Systems
                     </button>
                 </motion.div>
