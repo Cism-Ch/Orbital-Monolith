@@ -49,6 +49,12 @@ export function useUniverseEngine(options: UniverseEngineOptions = {}) {
                 options.cameraNear || 0.1,
                 options.cameraFar || 20000
             );
+            // SkyMapView uses FOV 60 and lerps toward targetCamZ = 1500 / zoom;
+            // SolarSystemView uses the default FOV 45 and lerps toward 1200 / zoom.
+            // Setting the initial z to the zoom=1 target ensures the scene is
+            // visible immediately rather than fading in from z=0.
+            const isWideFov = (options.cameraFov ?? 45) >= 60;
+            camera.position.z = isWideFov ? 1500 : 1200;
             cameraRef.current = camera;
         }
 

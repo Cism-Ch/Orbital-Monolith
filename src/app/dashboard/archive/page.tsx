@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Database, Search, Filter, BookOpen, ExternalLink, Sparkles, Shield, Compass } from 'lucide-react';
+import { Database, BookOpen, ExternalLink, Sparkles, Shield, Compass } from 'lucide-react';
 
 export default function ArchivePage() {
     const [filter, setFilter] = useState('ALL');

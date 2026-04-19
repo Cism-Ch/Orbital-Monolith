@@ -6,12 +6,10 @@ import { SolarSystemView } from '@/components/view/SolarSystemView';
 import { SkyMapView } from '@/components/view/SkyMapView';
 import { CelestialBody } from '@/types';
 import { SOLAR_SYSTEM } from '@/constants';
-import { calculateDistance, searchCelestial } from '@/services/celestialService';
-import { Info, Sparkles, Activity, ShieldCheck, Zap } from 'lucide-react';
-import { useClock } from '@/hooks/useClock';
+import { calculateDistance } from '@/services/celestialService';
+import { Sparkles, Zap } from 'lucide-react';
 import { useAccentColors } from '@/hooks/useAccentColors';
 import { TelemetryStream } from '@/components/ui/TelemetryStream';
-import { ControlPanel } from '@/components/ui/ControlPanel';
 import { AstrometricalBridge } from '@/components/ui/AstrometricalBridge';
 import { FocusView } from '@/components/ui/FocusView';
 
@@ -27,13 +25,7 @@ export default function DashboardPage() {
         showMilkyWay: true,
     });
 
-    const time = useClock();
     useAccentColors(state.selectedBody, state.hoveredBody);
-
-    const searchResults = useMemo(() =>
-        searchCelestial(state.searchQuery),
-        [state.searchQuery]
-    );
 
     const distanceToEarth = useMemo(() =>
         calculateDistance(state.selectedBody, SOLAR_SYSTEM[2]),
@@ -142,8 +134,12 @@ export default function DashboardPage() {
                             <span className="font-mono text-white font-bold">{state.selectedBody.properties.mass}</span>
                         </div>
                         <div className="bg-white/5 p-4 rounded-2xl">
-                            <span className="text-[9px] uppercase text-[#6c6c7a] font-black block mb-1">Magnitude</span>
-                            <span className="font-mono text-white font-bold">{state.selectedBody.properties.magnitude}</span>
+                            <span className="text-[9px] uppercase text-[#6c6c7a] font-black block mb-1">
+                                {state.selectedBody.properties.period ? 'Orbital Period' : 'Temperature'}
+                            </span>
+                            <span className="font-mono text-white font-bold">
+                                {state.selectedBody.properties.period ?? state.selectedBody.properties.temp}
+                            </span>
                         </div>
                     </div>
 

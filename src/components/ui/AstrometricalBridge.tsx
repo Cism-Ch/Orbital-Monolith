@@ -34,7 +34,6 @@ export const AstrometricalBridge: React.FC<AstrometricalBridgeProps> = ({
                 <div className="flex-1 flex flex-col items-center gap-2">
                     <div className="flex items-center gap-2 mb-1">
                         <span className="text-[10px] font-mono text-white font-black tracking-tighter">{distanceToEarth}</span>
-                        <span className="text-[8px] text-[#6c6c7a] font-bold">KM</span>
                     </div>
 
                     <div className="w-full relative h-1 flex items-center">

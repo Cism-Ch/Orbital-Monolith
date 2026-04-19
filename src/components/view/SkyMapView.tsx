@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { STARS, CONSTELLATIONS } from '@/constants';
 import { CelestialBody } from '@/types';
@@ -21,6 +21,8 @@ interface SkyMapViewProps {
     setShowMilkyWay: (v: boolean) => void;
 }
 
+const IS_BROWSER = typeof window !== 'undefined';
+
 export const SkyMapView: React.FC<SkyMapViewProps> = ({
     onSelect,
     onHover,
@@ -35,6 +37,16 @@ export const SkyMapView: React.FC<SkyMapViewProps> = ({
     const [showConstellations, setShowConstellations] = useState(true);
     const [constInfo, setConstInfo] = useState<any | null>(null);
     const { containerRef, scene, registerAnimation, renderer, camera } = useUniverseEngine({ cameraFov: 60 });
+    const fallbackLabelMaterialRef = useRef<THREE.SpriteMaterial | null>(null);
+    // Lazily initialize once using useMemo so it is only created on first render,
+    // not on every re-render as a bare conditional in the component body would do.
+    const fallbackLabelMaterial = useMemo(
+        () => new THREE.SpriteMaterial({ transparent: true, opacity: 0 }),
+        []
+    );
+    if (!fallbackLabelMaterialRef.current) {
+        fallbackLabelMaterialRef.current = fallbackLabelMaterial;
+    }
 
     const skyObjects = useMemo(() => {
         scene.clear();
@@ -107,24 +119,26 @@ export const SkyMapView: React.FC<SkyMapViewProps> = ({
         scene.add(mwPoints);
 
         // 4. Cardinal Points
-        const cardinals = [
-            { label: 'N', pos: [0, 0, -3200] }, { label: 'S', pos: [0, 0, 3200] },
-            { label: 'E', pos: [3200, 0, 0] }, { label: 'W', pos: [-3200, 0, 0] }
-        ];
-        cardinals.forEach(c => {
-            const canvas = document.createElement('canvas');
-            canvas.width = 128; canvas.height = 128;
-            const ctx = canvas.getContext('2d')!;
-            ctx.font = 'bold 80px Courier New';
-            ctx.fillStyle = '#4deeea';
-            ctx.textAlign = 'center';
-            ctx.fillText(c.label, 64, 80);
-            const tex = new THREE.CanvasTexture(canvas);
-            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0.6 }));
-            sprite.scale.set(100, 100, 1);
-            sprite.position.set(c.pos[0], c.pos[1], c.pos[2]);
-            scene.add(sprite);
-        });
+        if (IS_BROWSER) {
+            const cardinals = [
+                { label: 'N', pos: [0, 0, -3200] }, { label: 'S', pos: [0, 0, 3200] },
+                { label: 'E', pos: [3200, 0, 0] }, { label: 'W', pos: [-3200, 0, 0] }
+            ];
+            cardinals.forEach(c => {
+                const canvas = document.createElement('canvas');
+                canvas.width = 128; canvas.height = 128;
+                const ctx = canvas.getContext('2d')!;
+                ctx.font = 'bold 80px Courier New';
+                ctx.fillStyle = '#4deeea';
+                ctx.textAlign = 'center';
+                ctx.fillText(c.label, 64, 80);
+                const tex = new THREE.CanvasTexture(canvas);
+                const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0.6 }));
+                sprite.scale.set(100, 100, 1);
+                sprite.position.set(c.pos[0], c.pos[1], c.pos[2]);
+                scene.add(sprite);
+            });
+        }
 
         // 5. Major Stars & Labels
         const starPositionsMap = new Map<string, THREE.Vector3>();
@@ -154,16 +168,21 @@ export const SkyMapView: React.FC<SkyMapViewProps> = ({
             group.add(glow);
 
             // Premium Label (Contextual)
-            const canvas = document.createElement('canvas');
-            canvas.width = 256; canvas.height = 64;
-            const ctx = canvas.getContext('2d')!;
-            ctx.font = '24px Inter';
-            ctx.fillStyle = 'white';
-            ctx.textAlign = 'left';
-            ctx.shadowBlur = 4; ctx.shadowColor = 'rgba(0,0,0,0.5)';
-            ctx.fillText(star.name.toLowerCase(), 10, 40);
-            const labelTex = new THREE.CanvasTexture(canvas);
-            const labelSprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: labelTex, transparent: true, opacity: 0 }));
+            const labelMaterial = IS_BROWSER
+                ? (() => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 256; canvas.height = 64;
+                    const ctx = canvas.getContext('2d')!;
+                    ctx.font = '24px Inter';
+                    ctx.fillStyle = 'white';
+                    ctx.textAlign = 'left';
+                    ctx.shadowBlur = 4; ctx.shadowColor = 'rgba(0,0,0,0.5)';
+                    ctx.fillText(star.name.toLowerCase(), 10, 40);
+                    const labelTex = new THREE.CanvasTexture(canvas);
+                    return new THREE.SpriteMaterial({ map: labelTex, transparent: true, opacity: 0 });
+                })()
+                : fallbackLabelMaterialRef.current!;
+            const labelSprite = new THREE.Sprite(labelMaterial);
             labelSprite.scale.set(120, 30, 1);
             labelSprite.position.set(20, -10, 0);
             group.add(labelSprite);
@@ -194,7 +213,7 @@ export const SkyMapView: React.FC<SkyMapViewProps> = ({
             constellationLines.push({ mesh: lines, data: c });
 
             // Constellation Label (MAJUSCULES)
-            if (c.connections.length > 0) {
+            if (IS_BROWSER && c.connections.length > 0) {
                 const posA = starPositionsMap.get(c.connections[0][0])!;
                 const canvas = document.createElement('canvas');
                 canvas.width = 512; canvas.height = 128;
