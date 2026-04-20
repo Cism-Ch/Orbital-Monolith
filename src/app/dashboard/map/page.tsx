@@ -20,7 +20,7 @@ export default function MapPage() {
         hoveredBody: null as CelestialBody | null
     });
 
-    // Update accent colours to match the selected/hovered celestial body.
+    // Update accent colors to match the selected/hovered celestial body.
     useAccentColors(state.selectedBody, state.hoveredBody);
 
     return (
