@@ -91,8 +91,26 @@ export function useUniverseEngine(options: UniverseEngineOptions = {}) {
                 cancelAnimationFrame(animationFrameIdRef.current);
                 animationFrameIdRef.current = null;
             }
-            // Note: We don't dispose renderer here to keep it alive across parent re-renders
-            // Disposal should happen on true unmount if this hook is used as a singleton or managed elsewhere
+            // Dispose all scene objects (geometries, materials, textures) on unmount
+            sceneRef.current.traverse((obj) => {
+                const mesh = obj as THREE.Mesh;
+                if (mesh.isMesh || (mesh as unknown as THREE.Points).isPoints || (mesh as unknown as THREE.Line).isLine) {
+                    if (mesh.geometry) mesh.geometry.dispose();
+                    if (mesh.material) {
+                        if (Array.isArray(mesh.material)) {
+                            mesh.material.forEach((m: THREE.Material) => m.dispose());
+                        } else {
+                            (mesh.material as THREE.Material).dispose();
+                        }
+                    }
+                }
+            });
+            sceneRef.current.clear();
+            if (rendererRef.current) {
+                rendererRef.current.dispose();
+                rendererRef.current.domElement.remove();
+                rendererRef.current = null;
+            }
         };
     }, []); // Only run once on mount
 
