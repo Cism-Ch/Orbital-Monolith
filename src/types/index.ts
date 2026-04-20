@@ -24,19 +24,3 @@ export interface CelestialBody {
     colors: [string, string]; // Dynamic accent colors [Primary, Secondary]
     position: { x: number; y: number; z?: number }; // For mapping
 }
-
-export interface AppState {
-    view: 'SOLAR' | 'SKY';
-    selectedBody: CelestialBody | null;
-    distancePoints: CelestialBody[];
-    searchQuery: string;
-    isFocusMode: boolean;
-    skyOrientation: {
-        rotation: number;
-        inclination: number;
-    };
-    solarOrientation: {
-        rotation: number;
-        inclination: number;
-    };
-}

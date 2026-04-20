@@ -2,13 +2,16 @@ import { useEffect } from 'react';
 import { CelestialBody } from '@/types';
 import { SOLAR_SYSTEM } from '@/constants';
 
+/** Fallback RGB for the default `--accent-primary` (#4deeea). Kept in sync with globals.css. */
+const DEFAULT_ACCENT_RGB = '77, 238, 234';
+
 /** Converts a 6-digit hex color string to a comma-separated RGB triple (e.g. "#4deeea" → "77, 238, 234"). */
 function hexToRgb(hex: string): string {
     const clean = hex.startsWith('#') ? hex.slice(1) : hex;
     const r = parseInt(clean.slice(0, 2), 16);
     const g = parseInt(clean.slice(2, 4), 16);
     const b = parseInt(clean.slice(4, 6), 16);
-    if (isNaN(r) || isNaN(g) || isNaN(b)) return '77, 238, 234';
+    if (isNaN(r) || isNaN(g) || isNaN(b)) return DEFAULT_ACCENT_RGB;
     return `${r}, ${g}, ${b}`;
 }
 

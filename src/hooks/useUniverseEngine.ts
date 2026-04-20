@@ -91,17 +91,17 @@ export function useUniverseEngine(options: UniverseEngineOptions = {}) {
                 cancelAnimationFrame(animationFrameIdRef.current);
                 animationFrameIdRef.current = null;
             }
-            // Dispose all scene objects (geometries, materials, textures) on unmount
+            // Dispose all scene objects (geometries, materials, textures) on unmount.
+            // Checking for geometry/material presence covers Mesh, Points, and Line objects
+            // without needing verbose type assertions for each subclass.
             sceneRef.current.traverse((obj) => {
-                const mesh = obj as THREE.Mesh;
-                if (mesh.isMesh || (mesh as unknown as THREE.Points).isPoints || (mesh as unknown as THREE.Line).isLine) {
-                    if (mesh.geometry) mesh.geometry.dispose();
-                    if (mesh.material) {
-                        if (Array.isArray(mesh.material)) {
-                            mesh.material.forEach((m: THREE.Material) => m.dispose());
-                        } else {
-                            (mesh.material as THREE.Material).dispose();
-                        }
+                const renderable = obj as THREE.Mesh;
+                if (renderable.geometry) renderable.geometry.dispose();
+                if (renderable.material) {
+                    if (Array.isArray(renderable.material)) {
+                        renderable.material.forEach((m: THREE.Material) => m.dispose());
+                    } else {
+                        (renderable.material as THREE.Material).dispose();
                     }
                 }
             });

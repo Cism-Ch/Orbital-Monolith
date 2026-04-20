@@ -40,6 +40,7 @@ export default function DashboardPage() {
     );
 
     const handleSelectBody = useCallback((body: CelestialBody) => {
+        // Clear search query so ControlPanel shows the full list on next interaction
         setState(prev => ({ ...prev, selectedBody: body, isFocusMode: true, searchQuery: '' }));
     }, []);
 

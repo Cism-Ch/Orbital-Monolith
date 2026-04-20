@@ -130,6 +130,7 @@ export default function DashboardLayout({
                             <div className="flex flex-col items-end">
                                 <span className="text-[8px] font-black text-[#6c6c7a] uppercase tracking-widest leading-none mb-1">Session_Uptime</span>
                                 <span className="text-[12px] font-mono text-white font-black tracking-tighter">
+                                    {/* 'fr-FR' intentionally used for 24-hour format, consistent with useTelemetry */}
                                     {currentTime.toLocaleTimeString('fr-FR', { hour12: false })}
                                 </span>
                             </div>
