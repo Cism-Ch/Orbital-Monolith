@@ -14,6 +14,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useClock } from '@/hooks/useClock';
+import { Footer } from '@/components/ui/Footer';
 
 export default function DashboardLayout({
     children,
@@ -21,6 +23,7 @@ export default function DashboardLayout({
     children: React.ReactNode;
 }) {
     const pathname = usePathname();
+    const currentTime = useClock();
 
     const menuItems = [
         { icon: LayoutDashboard, label: 'Sector Control', href: '/dashboard' },
@@ -126,7 +129,10 @@ export default function DashboardLayout({
                         <div className="hidden xl:flex items-center gap-6 pr-6 border-r border-white/10">
                             <div className="flex flex-col items-end">
                                 <span className="text-[8px] font-black text-[#6c6c7a] uppercase tracking-widest leading-none mb-1">Session_Uptime</span>
-                                <span className="text-[12px] font-mono text-white font-black tracking-tighter">04:12:35:88</span>
+                                <span className="text-[12px] font-mono text-white font-black tracking-tighter">
+                                    {/* 'fr-FR' intentionally used for 24-hour format, consistent with useTelemetry */}
+                                    {currentTime.toLocaleTimeString('fr-FR', { hour12: false })}
+                                </span>
                             </div>
                             <Activity size={20} className="text-[var(--accent-primary)] animate-pulse" />
                         </div>
@@ -162,6 +168,15 @@ export default function DashboardLayout({
                         </motion.div>
                     </AnimatePresence>
                 </main>
+
+                {/* Status Footer */}
+                <motion.div
+                    initial={{ y: 60, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    className="h-14 bg-black/40 border border-white/10 rounded-[2rem] backdrop-blur-3xl shadow-2xl shrink-0"
+                >
+                    <Footer currentTime={currentTime} />
+                </motion.div>
             </div>
 
             {/* Global Ambient Background */}

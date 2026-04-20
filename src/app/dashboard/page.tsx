@@ -6,12 +6,13 @@ import { SolarSystemView } from '@/components/view/SolarSystemView';
 import { SkyMapView } from '@/components/view/SkyMapView';
 import { CelestialBody } from '@/types';
 import { SOLAR_SYSTEM } from '@/constants';
-import { calculateDistance } from '@/services/celestialService';
+import { calculateDistance, searchCelestial } from '@/services/celestialService';
 import { Sparkles, Zap } from 'lucide-react';
 import { useAccentColors } from '@/hooks/useAccentColors';
 import { TelemetryStream } from '@/components/ui/TelemetryStream';
 import { AstrometricalBridge } from '@/components/ui/AstrometricalBridge';
 import { FocusView } from '@/components/ui/FocusView';
+import { ControlPanel } from '@/components/ui/ControlPanel';
 
 export default function DashboardPage() {
     const [state, setState] = useState({
@@ -32,8 +33,15 @@ export default function DashboardPage() {
         [state.selectedBody]
     );
 
+    // Live search results derived from the current query
+    const searchResults = useMemo(() =>
+        searchCelestial(state.searchQuery),
+        [state.searchQuery]
+    );
+
     const handleSelectBody = useCallback((body: CelestialBody) => {
-        setState(prev => ({ ...prev, selectedBody: body, isFocusMode: true }));
+        // Clear search query so ControlPanel shows the full list on next interaction
+        setState(prev => ({ ...prev, selectedBody: body, isFocusMode: true, searchQuery: '' }));
     }, []);
 
     return (
@@ -88,7 +96,7 @@ export default function DashboardPage() {
                     )}
                 </AnimatePresence>
 
-                {/* Overlaid View Controls */}
+                {/* Overlaid View Controls — compact labels only when ControlPanel is in sidebar */}
                 <div className="absolute bottom-6 left-6 z-40 bg-black/40 backdrop-blur-md border border-white/5 p-2 rounded-2xl flex items-center gap-2">
                     <button
                         onClick={() => setState(p => ({ ...p, view: 'SOLAR' }))}
@@ -107,6 +115,16 @@ export default function DashboardPage() {
 
             {/* Right Side Data Panels */}
             <aside className="flex flex-col gap-6 overflow-y-auto custom-scrollbar pr-2">
+                {/* View Toggle + Stellar Search */}
+                <ControlPanel
+                    view={state.view}
+                    setView={(v) => setState(p => ({ ...p, view: v }))}
+                    searchQuery={state.searchQuery}
+                    setSearchQuery={(q) => setState(p => ({ ...p, searchQuery: q }))}
+                    searchResults={searchResults}
+                    onSelectBody={handleSelectBody}
+                />
+
                 {/* Object Analysis Card */}
                 <motion.div
                     key={state.selectedBody.id}

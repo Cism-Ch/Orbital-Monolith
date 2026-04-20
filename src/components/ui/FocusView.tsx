@@ -2,9 +2,10 @@
 
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { X, Sparkles, Database, Zap, Activity, ShieldCheck, Globe } from 'lucide-react';
+import { X, Sparkles, Database, Zap, Activity, ShieldCheck } from 'lucide-react';
 import { CelestialBody } from '@/types';
 import { TelemetryStream } from './TelemetryStream';
+import { CelestialBody3D } from '@/components/view/CelestialBody3D';
 
 interface FocusViewProps {
     body: CelestialBody;
@@ -65,11 +66,12 @@ export const FocusView: React.FC<FocusViewProps> = ({ body, onClose }) => {
                 <div className="flex-1 p-12 flex flex-col gap-8 relative">
                     <div className="flex items-center gap-6">
                         <motion.div
-                            initial={{ rotate: -180, opacity: 0 }}
-                            animate={{ rotate: 0, opacity: 1 }}
-                            className="w-20 h-20 rounded-[2rem] bg-[var(--accent-primary)] flex items-center justify-center shadow-[0_0_40px_rgba(var(--accent-primary-rgb),0.3)]"
+                            initial={{ scale: 0.6, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ duration: 0.6, ease: "easeOut" }}
+                            className="shrink-0"
                         >
-                            <Globe className="text-black" size={40} />
+                            <CelestialBody3D body={body} size={120} />
                         </motion.div>
                         <div>
                             <motion.h2
