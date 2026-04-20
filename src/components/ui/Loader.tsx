@@ -5,11 +5,12 @@ import { motion } from 'framer-motion';
 import { Globe, Satellite } from 'lucide-react';
 
 interface LoaderProps {
-    onComplete: () => void;
+    onComplete?: () => void;
 }
 
 export const Loader: React.FC<LoaderProps> = ({ onComplete }) => {
     React.useEffect(() => {
+        if (!onComplete) return;
         const timer = setTimeout(onComplete, 2000);
         return () => clearTimeout(timer);
     }, [onComplete]);
