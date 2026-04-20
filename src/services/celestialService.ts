@@ -3,8 +3,24 @@ import { SOLAR_SYSTEM, STARS } from '@/constants';
 
 const ALL_BODIES = [...SOLAR_SYSTEM, ...STARS];
 
-export const searchCelestial = (query: string): CelestialBody[] => {
-    const q = query.toLowerCase();
+/**
+ * Search celestial bodies by name or scientific name.
+ *
+ * When the query is empty, returns only the bodies relevant to the active `view`
+ * so the browse list is contextual (SOLAR → planets/system, SKY → stars/deep-sky).
+ * When a query is present, searches across ALL bodies regardless of view, allowing
+ * cross-view discovery (e.g. typing "Sirius" while in SOLAR mode still finds it,
+ * and selecting it will auto-switch the view to SKY via the caller).
+ */
+export const searchCelestial = (query: string, view?: 'SOLAR' | 'SKY'): CelestialBody[] => {
+    const q = query.toLowerCase().trim();
+
+    if (!q) {
+        if (view === 'SOLAR') return SOLAR_SYSTEM;
+        if (view === 'SKY') return STARS;
+        return ALL_BODIES;
+    }
+
     return ALL_BODIES.filter(b =>
         b.name.toLowerCase().includes(q) ||
         b.scientificName.toLowerCase().includes(q)

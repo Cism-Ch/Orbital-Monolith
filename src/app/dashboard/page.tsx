@@ -14,13 +14,20 @@ import { AstrometricalBridge } from '@/components/ui/AstrometricalBridge';
 import { FocusView } from '@/components/ui/FocusView';
 import { ControlPanel } from '@/components/ui/ControlPanel';
 
+// Orientation used on first load and when the reset button is pressed.
+const INITIAL_ORIENTATION = { rotation: 0, inclination: 10 };
+
+// Set of IDs that belong to the Solar System view so we can auto-switch when
+// a body from the search results or Sky Map is selected.
+const SOLAR_SYSTEM_IDS = new Set(SOLAR_SYSTEM.map(b => b.id));
+
 export default function DashboardPage() {
     const [state, setState] = useState({
         view: 'SOLAR' as 'SOLAR' | 'SKY',
         selectedBody: SOLAR_SYSTEM[0],
         searchQuery: '',
         isFocusMode: false,
-        orientation: { rotation: 0, inclination: 10 },
+        orientation: INITIAL_ORIENTATION,
         hoveredBody: null as CelestialBody | null,
         showGrid: false,
         showMilkyWay: true,
@@ -33,15 +40,20 @@ export default function DashboardPage() {
         [state.selectedBody]
     );
 
-    // Live search results derived from the current query
+    // Live search results derived from the current query.
+    // Empty query → bodies scoped to the active view for contextual browsing.
+    // Non-empty query → global search so cross-view objects are discoverable.
     const searchResults = useMemo(() =>
-        searchCelestial(state.searchQuery),
-        [state.searchQuery]
+        searchCelestial(state.searchQuery, state.view),
+        [state.searchQuery, state.view]
     );
 
     const handleSelectBody = useCallback((body: CelestialBody) => {
-        // Clear search query so ControlPanel shows the full list on next interaction
-        setState(prev => ({ ...prev, selectedBody: body, isFocusMode: true, searchQuery: '' }));
+        // Auto-switch to the view that contains the selected body so the user
+        // always lands in the correct visualisation context.
+        const targetView: 'SOLAR' | 'SKY' = SOLAR_SYSTEM_IDS.has(body.id) ? 'SOLAR' : 'SKY';
+        // Clear search query so ControlPanel shows the contextual list on next interaction.
+        setState(prev => ({ ...prev, selectedBody: body, isFocusMode: true, searchQuery: '', view: targetView }));
     }, []);
 
     return (
@@ -72,6 +84,7 @@ export default function DashboardPage() {
                                 setShowGrid={(v) => setState(p => ({ ...p, showGrid: v }))}
                                 showMilkyWay={state.showMilkyWay}
                                 setShowMilkyWay={(v) => setState(p => ({ ...p, showMilkyWay: v }))}
+                                defaultOrientation={INITIAL_ORIENTATION}
                             />
                         </motion.div>
                     ) : (
@@ -91,6 +104,7 @@ export default function DashboardPage() {
                                 setShowGrid={(v) => setState(p => ({ ...p, showGrid: v }))}
                                 showMilkyWay={state.showMilkyWay}
                                 setShowMilkyWay={(v) => setState(p => ({ ...p, showMilkyWay: v }))}
+                                defaultOrientation={INITIAL_ORIENTATION}
                             />
                         </motion.div>
                     )}

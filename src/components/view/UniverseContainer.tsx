@@ -13,6 +13,9 @@ interface UniverseContainerProps {
     setZoom: (z: number | ((prev: number) => number)) => void;
     title: string;
     subtitle: string;
+    // Orientation to return to when the reset button is pressed.
+    // Defaults to { rotation: 0, inclination: 45 } for backward compatibility.
+    defaultOrientation?: { rotation: number; inclination: number };
     // New Props for Layer Controls
     showGrid?: boolean;
     setShowGrid?: (v: boolean) => void;
@@ -29,6 +32,7 @@ export const UniverseContainer: React.FC<UniverseContainerProps> = ({
     setZoom,
     title,
     subtitle,
+    defaultOrientation = { rotation: 0, inclination: 45 },
     showGrid,
     setShowGrid,
     showMilkyWay,
@@ -80,6 +84,9 @@ export const UniverseContainer: React.FC<UniverseContainerProps> = ({
             isDraggingRef.current = true;
             lastMouseRef.current = { x: e.clientX, y: e.clientY };
             canvas.style.cursor = 'grabbing';
+            // Also override the Three.js canvas cursor (child element) so the
+            // grabbing state is not hidden by its own inline cursor style.
+            (canvas.querySelector('canvas') as HTMLElement | null)?.style.setProperty('cursor', 'grabbing');
         };
 
         // Throttled mouse move handler for better performance
@@ -134,11 +141,14 @@ export const UniverseContainer: React.FC<UniverseContainerProps> = ({
         const handleMouseUp = () => {
             isDraggingRef.current = false;
             canvas.style.cursor = 'move';
+            // Remove the drag-override so the view's own hover logic regains control.
+            (canvas.querySelector('canvas') as HTMLElement | null)?.style.removeProperty('cursor');
         };
 
         const handleMouseLeave = () => {
             isDraggingRef.current = false;
             canvas.style.cursor = 'move';
+            (canvas.querySelector('canvas') as HTMLElement | null)?.style.removeProperty('cursor');
         };
 
         canvas.addEventListener('mousedown', handleMouseDown);
@@ -302,7 +312,7 @@ export const UniverseContainer: React.FC<UniverseContainerProps> = ({
                             </motion.button>
                             <motion.button
                                 whileHover={{ rotate: 180 }} transition={{ duration: 0.5 }}
-                                onClick={() => { setOrientation({ rotation: 0, inclination: 45 }); setZoom(1); }}
+                                onClick={() => { setOrientation(defaultOrientation); setZoom(1); }}
                                 className="w-12 h-12 rounded-full bg-[var(--accent-primary)]/10 border border-[var(--accent-primary)]/30 flex items-center justify-center text-[var(--accent-primary)] hover:bg-[var(--accent-primary)] hover:text-black transition-all"
                             >
                                 <RotateCw size={18} />

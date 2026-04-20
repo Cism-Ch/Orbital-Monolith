@@ -17,6 +17,8 @@ interface SolarSystemViewProps {
     setShowGrid: (v: boolean) => void;
     showMilkyWay: boolean;
     setShowMilkyWay: (v: boolean) => void;
+    // Orientation to return to when the reset button is pressed.
+    defaultOrientation?: { rotation: number; inclination: number };
 }
 
 export const SolarSystemView: React.FC<SolarSystemViewProps> = ({
@@ -27,7 +29,8 @@ export const SolarSystemView: React.FC<SolarSystemViewProps> = ({
     showGrid,
     setShowGrid,
     showMilkyWay,
-    setShowMilkyWay
+    setShowMilkyWay,
+    defaultOrientation
 }) => {
     const [zoom, setZoom] = useState(1);
     const { containerRef, scene, registerAnimation, renderer, camera } = useUniverseEngine();
@@ -291,6 +294,7 @@ export const SolarSystemView: React.FC<SolarSystemViewProps> = ({
             setShowGrid={setShowGrid}
             showMilkyWay={showMilkyWay}
             setShowMilkyWay={setShowMilkyWay}
+            defaultOrientation={defaultOrientation}
         >
         </UniverseContainer>
     );

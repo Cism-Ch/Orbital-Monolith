@@ -19,6 +19,8 @@ interface SkyMapViewProps {
     setShowGrid: (v: boolean) => void;
     showMilkyWay: boolean;
     setShowMilkyWay: (v: boolean) => void;
+    // Orientation to return to when the reset button is pressed.
+    defaultOrientation?: { rotation: number; inclination: number };
 }
 
 const IS_BROWSER = typeof window !== 'undefined';
@@ -31,7 +33,8 @@ export const SkyMapView: React.FC<SkyMapViewProps> = ({
     showGrid,
     setShowGrid,
     showMilkyWay,
-    setShowMilkyWay
+    setShowMilkyWay,
+    defaultOrientation
 }) => {
     const [zoom, setZoom] = useState(1);
     const [showConstellations, setShowConstellations] = useState(true);
@@ -362,6 +365,7 @@ export const SkyMapView: React.FC<SkyMapViewProps> = ({
             setShowGrid={setShowGrid}
             showMilkyWay={showMilkyWay}
             setShowMilkyWay={setShowMilkyWay}
+            defaultOrientation={defaultOrientation}
         >
             {/* Constellation Toggle - Specific to SkyMap */}
             <div className="absolute top-24 left-8 z-30">

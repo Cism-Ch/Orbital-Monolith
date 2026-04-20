@@ -2,18 +2,26 @@
 
 import React, { useState } from 'react';
 import { SkyMapView } from '@/components/view/SkyMapView';
+import { FocusView } from '@/components/ui/FocusView';
 import { CelestialBody } from '@/types';
+import { useAccentColors } from '@/hooks/useAccentColors';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Compass, Sparkles } from 'lucide-react';
 
+// Orientation used on first load and when the reset button is pressed.
+const INITIAL_ORIENTATION = { rotation: 0, inclination: 30 };
+
 export default function MapPage() {
     const [state, setState] = useState({
-        orientation: { rotation: 0, inclination: 30 },
+        orientation: INITIAL_ORIENTATION,
         showGrid: true,
         showMilkyWay: true,
         selectedBody: null as CelestialBody | null,
         hoveredBody: null as CelestialBody | null
     });
+
+    // Update accent colours to match the selected/hovered celestial body.
+    useAccentColors(state.selectedBody, state.hoveredBody);
 
     return (
         <div className="w-full h-full relative overflow-hidden">
@@ -27,6 +35,7 @@ export default function MapPage() {
                 setShowGrid={(v) => setState(p => ({ ...p, showGrid: v }))}
                 showMilkyWay={state.showMilkyWay}
                 setShowMilkyWay={(v) => setState(p => ({ ...p, showMilkyWay: v }))}
+                defaultOrientation={INITIAL_ORIENTATION}
             />
 
             {/* Overlaid Page Meta (Minimalist) */}
@@ -59,6 +68,16 @@ export default function MapPage() {
                             <p className="text-[#6c6c7a] text-[8px] font-bold">{state.hoveredBody.scientificName}</p>
                         </div>
                     </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Full detail panel — shown when a star or constellation is clicked */}
+            <AnimatePresence>
+                {state.selectedBody && (
+                    <FocusView
+                        body={state.selectedBody}
+                        onClose={() => setState(p => ({ ...p, selectedBody: null }))}
+                    />
                 )}
             </AnimatePresence>
         </div>
