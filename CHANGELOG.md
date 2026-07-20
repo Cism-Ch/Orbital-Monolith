@@ -2,8 +2,21 @@
 
 Toutes les modifications majeures apportées au projet **Orbital Monolith** sont documentées dans ce fichier.
 
-Le format est basé sur [Keep a Changelog](https.keepachangelog.com/fr/1.0.0/),
+Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
 et ce projet adhère au sémantisme de versioning [Semantic Versioning](https://semver.org/lang/fr/).
+
+## [3.6.1] - 2026-07-20
+
+### 🎛️ Panneau de Contrôle Scène Repliable & Documentation Anglaise
+- **Repliement Dynamique du Panneau `SceneControlPanel` (`Solar Control` / `Sky Control`)** :
+  - Ajout d'un bouton de repliement/dépliement (`ChevronDown` / `ChevronUp`) dans l'en-tête du composant [SceneControlPanel.tsx](file:///c:/Users/hanok/Dev/Personal-Project/Orbital-Monolith/src/components/ui/SceneControlPanel.tsx).
+  - Intégration de `AnimatePresence` pour une animation de repliement verticale fluide de la zone des contrôles (Inclination, Rotation, Zoom, Reset View).
+  - Permet à l'utilisateur de passer instantanément en affichage 3D plein écran épuré sans obstruction visuelle.
+- **Captures d'Écran Réelles de l'Application** :
+  - Suppression de l'ancienne image d'en-tête statique et intégration dans le README de 4 véritables captures d'écran de l'application (Landing, Sky Map, Gaia Archive, System Calibration) générées automatiquement depuis le serveur local.
+- **Traduction & Polissage de la Documentation (`README.md`)** :
+  - Traduction intégrale en anglais du fichier `README.md` v3.6.
+  - Enrichissement des sections d'architecture, du télémètre laser 3D (`AstrometricalBridge`) et de la sidebar escamotable.
 
 ## [3.6.0] - 2026-07-19
 
