@@ -18,6 +18,8 @@ interface UniverseContainerProps {
     setShowGrid?: (v: boolean) => void;
     showMilkyWay?: boolean;
     setShowMilkyWay?: (v: boolean) => void;
+    perspectiveMode?: 'heliocentric' | 'free';
+    setPerspectiveMode?: (m: 'heliocentric' | 'free') => void;
 }
 
 export const UniverseContainer: React.FC<UniverseContainerProps> = ({
@@ -32,7 +34,9 @@ export const UniverseContainer: React.FC<UniverseContainerProps> = ({
     showGrid,
     setShowGrid,
     showMilkyWay,
-    setShowMilkyWay
+    setShowMilkyWay,
+    perspectiveMode = 'heliocentric',
+    setPerspectiveMode
 }) => {
     const [isImmersion, setIsImmersion] = React.useState(false);
     const wrapperRef = React.useRef<HTMLDivElement>(null);
@@ -84,14 +88,14 @@ export const UniverseContainer: React.FC<UniverseContainerProps> = ({
 
         // Throttled mouse move handler for better performance
         const handleMouseMove = (e: MouseEvent) => {
-            if (!isDraggingRef.current) return;
+            if (!isDraggingRef.current || perspectiveMode === 'free') return;
 
             // Store the latest event
             lastEventRef.current = e;
 
             // Use requestAnimationFrame for smooth performance
             if (rafIdRef.current !== null) return;
-            
+
             rafIdRef.current = requestAnimationFrame(() => {
                 const lastEvent = lastEventRef.current;
                 if (!lastEvent) {
@@ -106,7 +110,7 @@ export const UniverseContainer: React.FC<UniverseContainerProps> = ({
                 // into degrees of rotation; it keeps the interaction responsive without feeling too "twitchy".
                 const rotationDelta = deltaX * 0.5;
                 let newRotation = orientation.rotation + rotationDelta;
-                
+
                 // Wrap rotation into the range [-180, 180] degrees so it remains continuous for the viewer.
                 // Values above +180° are mapped by subtracting 360° (e.g. 190° → -170°),
                 // and values below -180° are mapped by adding 360° (e.g. -190° → 170°).
@@ -224,10 +228,19 @@ export const UniverseContainer: React.FC<UniverseContainerProps> = ({
                                             <span className="text-[7px] font-black">M</span>
                                         </button>
                                     )}
+                                    {setPerspectiveMode && (
+                                        <button
+                                            onClick={() => setPerspectiveMode(perspectiveMode === 'heliocentric' ? 'free' : 'heliocentric')}
+                                            className={`w-5 h-5 rounded-md flex items-center justify-center transition-all ${perspectiveMode === 'free' ? 'bg-[var(--accent-primary)] text-black' : 'bg-white/5 text-white/40'}`}
+                                            title="Toggle Perspective: Heliocentric / Free"
+                                        >
+                                            <RotateCw size={10} className={perspectiveMode === 'free' ? 'animate-spin-slow' : ''} />
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 
-                            <div className="space-y-4">
+                            <div className={`space-y-4 ${perspectiveMode === 'free' ? 'opacity-30 pointer-events-none' : ''}`}>
                                 <div className="space-y-2">
                                     <div className="flex justify-between font-mono text-[8px] uppercase text-[#6c6c7a] font-bold">
                                         <span>Inclination</span>

@@ -2,10 +2,36 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Database, Search, Filter, BookOpen, ExternalLink, Sparkles, Shield, Compass } from 'lucide-react';
+import { Database, BookOpen, ExternalLink, Sparkles, Shield, Compass } from 'lucide-react';
+import { useDashboard } from '@/lib/DashboardContext';
+import { useRouter } from 'next/navigation';
+import { SOLAR_SYSTEM, STARS } from '@/constants';
 
 export default function ArchivePage() {
     const [filter, setFilter] = useState('ALL');
+    const { setView, setSelectedBody, setIsFocusMode } = useDashboard();
+    const router = useRouter();
+
+    const handleReadIntel = (docId: string) => {
+        const targetMap: Record<string, { view: 'SOLAR' | 'SKY', bodyId: string }> = {
+            'sol-guide': { view: 'SOLAR', bodyId: 'sun' },
+            'const-myth': { view: 'SKY', bodyId: 'polaris' },
+            'gaia-catalog': { view: 'SKY', bodyId: 'sirius' },
+            'trappist-1': { view: 'SKY', bodyId: 'trappist1' },
+            'nebular-birth': { view: 'SOLAR', bodyId: 'sun' }
+        };
+        const target = targetMap[docId];
+        if (target) {
+            const list = target.view === 'SOLAR' ? SOLAR_SYSTEM : STARS;
+            const body = list.find(b => b.id === target.bodyId);
+            if (body) {
+                setView(target.view);
+                setSelectedBody(body);
+                setIsFocusMode(true);
+                router.push('/dashboard');
+            }
+        }
+    };
 
     const documents = [
         {
@@ -48,10 +74,10 @@ export default function ArchivePage() {
     const filteredDocs = filter === 'ALL' ? documents : documents.filter(d => d.category === filter);
 
     return (
-        <div className="w-full h-full flex flex-col gap-8 p-4">
+        <div className="w-full h-full flex flex-col gap-8 p-4 pointer-events-auto pb-24">
             {/* Header Section */}
             <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 px-4">
-                <div>
+                <div className="bg-black/60 backdrop-blur-2xl p-6 rounded-3xl border border-white/10">
                     <div className="flex items-center gap-3 mb-2">
                         <Database size={18} className="text-[var(--accent-primary)]" />
                         <span className="font-mono text-[9px] uppercase font-black text-white/40 tracking-[0.4em]">Integrated_Archives</span>
@@ -59,13 +85,13 @@ export default function ArchivePage() {
                     <h2 className="text-4xl font-black uppercase text-white tracking-widest">Gaia_Repository</h2>
                 </div>
 
-                <div className="flex gap-2 bg-black/40 backdrop-blur-3xl p-1.5 rounded-full border border-white/10 shadow-2xl">
+                <div className="flex gap-2 bg-black/70 backdrop-blur-3xl p-2 rounded-full border border-white/10 shadow-2xl">
                     {['ALL', 'SYSTEM', 'GALAXY', 'TECH'].map((cat) => (
                         <button
                             key={cat}
                             onClick={() => setFilter(cat)}
-                            className={`px-6 py-2 rounded-full text-[9px] font-black uppercase tracking-widest transition-all ${filter === cat
-                                    ? 'bg-[var(--accent-primary)] text-black'
+                            className={`px-6 py-2.5 rounded-full text-[9px] font-black uppercase tracking-widest transition-all ${filter === cat
+                                    ? 'bg-[var(--accent-primary)] text-black shadow-lg shadow-[var(--accent-primary)]/20'
                                     : 'text-[#6c6c7a] hover:text-white hover:bg-white/5'
                                 }`}
                         >
@@ -86,8 +112,8 @@ export default function ArchivePage() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.9 }}
-                                transition={{ delay: i * 0.1 }}
-                                className="monolith-panel !rounded-[2.5rem] p-8 group hover:border-[var(--accent-primary)]/30 transition-all flex flex-col gap-6"
+                                transition={{ delay: i * 0.08 }}
+                                className="monolith-panel !bg-black/80 !backdrop-blur-3xl !rounded-[2.5rem] p-8 group hover:border-[var(--accent-primary)]/40 transition-all flex flex-col gap-6 shadow-2xl"
                             >
                                 <div className="flex justify-between items-start">
                                     <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[var(--accent-primary)] group-hover:scale-110 group-hover:bg-[var(--accent-primary)] group-hover:text-black transition-all">
@@ -119,7 +145,10 @@ export default function ArchivePage() {
                                         <Shield size={12} className="text-emerald-500" />
                                         <span className="text-[8px] font-black text-[#6c6c7a] uppercase tracking-widest">Clearance_Lvl_4</span>
                                     </div>
-                                    <button className="flex items-center gap-2 text-[9px] font-black uppercase text-[var(--accent-primary)] hover:gap-4 transition-all">
+                                    <button 
+                                        onClick={() => handleReadIntel(doc.id)}
+                                        className="flex items-center gap-2 text-[9px] font-black uppercase text-[var(--accent-primary)] hover:gap-4 transition-all"
+                                    >
                                         Read_Intel <ExternalLink size={12} />
                                     </button>
                                 </div>

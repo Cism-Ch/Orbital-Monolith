@@ -7,15 +7,20 @@ import { CelestialBody } from '@/types';
 interface CelestialBody3DProps {
     body: CelestialBody;
     size?: number;
+    showTitle?: boolean;
     onClick?: () => void;
 }
 
-export const CelestialBody3D: React.FC<CelestialBody3DProps> = ({ body, size = 300, onClick }) => {
+export const CelestialBody3D: React.FC<CelestialBody3DProps> = ({ body, size = 300, showTitle = true, onClick }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [isHovered, setIsHovered] = useState(false);
 
     useEffect(() => {
-        if (!containerRef.current) return;
+        const container = containerRef.current;
+        if (!container) return;
+
+        // Vider le conteneur pour éviter toute duplication de canvas WebGL
+        container.innerHTML = '';
 
         const width = size;
         const height = size;
@@ -30,8 +35,8 @@ export const CelestialBody3D: React.FC<CelestialBody3DProps> = ({ body, size = 3
         // Renderer
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(width, height);
-        renderer.setPixelRatio(window.devicePixelRatio);
-        containerRef.current.appendChild(renderer.domElement);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
 
         // --- Main Sphere geometry ---
         const geometry = new THREE.SphereGeometry(1, 64, 64);
@@ -156,7 +161,7 @@ export const CelestialBody3D: React.FC<CelestialBody3DProps> = ({ body, size = 3
         };
         animate();
 
-        // Cleanup
+        // Cleanup complet
         return () => {
             cancelAnimationFrame(animationFrameId);
             renderer.domElement.removeEventListener('mousemove', onMouseMove);
@@ -166,15 +171,15 @@ export const CelestialBody3D: React.FC<CelestialBody3DProps> = ({ body, size = 3
             material.dispose();
             glowGeometry.dispose();
             glowMaterial.dispose();
-            if (containerRef.current) {
-                containerRef.current.removeChild(renderer.domElement);
+            if (container) {
+                container.innerHTML = '';
             }
         };
     }, [body, size, isHovered, onClick]);
 
     return (
         <div
-            className={`flex flex-col items-center justify-center animate-in zoom-in-75 duration-1000 relative overflow-visible rounded-full transition-all duration-1000 ${isHovered ? 'scale-105' : 'scale-100'}`}
+            className={`flex flex-col items-center justify-center relative transition-all duration-500 ${isHovered ? 'scale-105' : 'scale-100'}`}
             style={{
                 background: `radial-gradient(circle at center, ${body.colors[0]}${isHovered ? '35' : '15'} 0%, transparent 70%)`
             }}
@@ -182,22 +187,24 @@ export const CelestialBody3D: React.FC<CelestialBody3DProps> = ({ body, size = 3
             <div
                 ref={containerRef}
                 style={{ width: `${size}px`, height: `${size}px` }}
-                className="relative z-10"
+                className="relative z-10 flex items-center justify-center overflow-hidden"
             >
                 <div
-                    className={`absolute inset-0 rounded-full blur-[100px] transition-opacity duration-2000 pointer-events-none ${isHovered ? 'opacity-30' : 'opacity-[0.12]'}`}
+                    className={`absolute inset-0 rounded-full blur-[80px] transition-opacity duration-1000 pointer-events-none ${isHovered ? 'opacity-30' : 'opacity-[0.12]'}`}
                     style={{ backgroundColor: body.colors[0] }}
                 />
             </div>
 
-            <div className="mt-4 text-center z-10">
-                <h2 className={`text-xl font-black uppercase tracking-tighter mb-0.5 transition-all duration-1000 ${isHovered ? 'drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]' : ''}`} style={{ color: body.colors[0] }}>
-                    {body.name}
-                </h2>
-                <div className="font-mono text-[7px] text-white/30 uppercase tracking-[0.4em]">
-                    IDENT: {body.scientificName} // {body.type}
+            {showTitle && (
+                <div className="mt-3 text-center z-10">
+                    <h2 className={`text-xl font-black uppercase tracking-tighter mb-0.5 transition-all duration-500 ${isHovered ? 'drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]' : ''}`} style={{ color: body.colors[0] }}>
+                        {body.name}
+                    </h2>
+                    <div className="font-mono text-[7px] text-white/30 uppercase tracking-[0.4em]">
+                        IDENT: {body.scientificName} // {body.type}
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 };

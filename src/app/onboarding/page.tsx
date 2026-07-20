@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { Globe, Satellite, Terminal, ShieldCheck, Activity } from 'lucide-react';
+import { Globe, Satellite, Terminal, ShieldCheck, Activity, FastForward } from 'lucide-react';
 
 export default function OnboardingPage() {
     const [step, setStep] = useState(0);
@@ -11,7 +11,7 @@ export default function OnboardingPage() {
     const router = useRouter();
 
     const sequence = [
-        "Initializing GAIA_CORE_v2.5...",
+        "Initializing GAIA_CORE_v3.0...",
         "Establishing Orbital Link...",
         "Syncing Sidereal Time...",
         "Mapping Local Group Stars...",
@@ -80,7 +80,7 @@ export default function OnboardingPage() {
                         <div className="h-32 w-64 md:w-80 bg-black/40 border border-white/5 rounded-xl p-4 flex flex-col gap-1 overflow-hidden backdrop-blur-sm">
                             <div className="flex items-center gap-2 mb-2 border-b border-white/5 pb-2 text-[8px] text-[#6c6c7a]">
                                 <Terminal size={10} />
-                                <span>SYSTEM_CONSOLE_v2.5</span>
+                                <span>SYSTEM_CONSOLE_v3.0</span>
                             </div>
                             <div className="overflow-y-auto space-y-1 custom-scrollbar">
                                 {logs.map((log, i) => (
@@ -97,16 +97,28 @@ export default function OnboardingPage() {
                             </div>
                         </div>
 
-                        {/* Status Badges */}
-                        <div className="flex gap-4 justify-center pt-4">
-                            <div className="flex items-center gap-2 text-[8px] text-[#6c6c7a] uppercase font-bold">
-                                <ShieldCheck size={10} className="text-emerald-500" />
-                                <span>Sec_Link: OK</span>
+                        {/* Status Badges & Skip Button */}
+                        <div className="flex flex-col items-center gap-4 pt-4">
+                            <div className="flex gap-4 justify-center">
+                                <div className="flex items-center gap-2 text-[8px] text-[#6c6c7a] uppercase font-bold">
+                                    <ShieldCheck size={10} className="text-emerald-500" />
+                                    <span>Sec_Link: OK</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-[8px] text-[#6c6c7a] uppercase font-bold">
+                                    <Activity size={10} className="text-[var(--accent-primary)]" />
+                                    <span>Latency: 12ms</span>
+                                </div>
                             </div>
-                            <div className="flex items-center gap-2 text-[8px] text-[#6c6c7a] uppercase font-bold">
-                                <Activity size={10} className="text-[var(--accent-primary)]" />
-                                <span>Latency: 12ms</span>
-                            </div>
+
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => router.push('/dashboard')}
+                                className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white text-[8px] font-black uppercase tracking-widest transition-all"
+                            >
+                                <FastForward size={10} className="text-[var(--accent-primary)]" />
+                                Skip Sequence // Fast Forward
+                            </motion.button>
                         </div>
                     </div>
                 </motion.div>

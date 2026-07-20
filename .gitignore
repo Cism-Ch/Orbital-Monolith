@@ -48,3 +48,6 @@ logs
 
 # Project specific
 build_output.txt
+
+# agent
+.agents

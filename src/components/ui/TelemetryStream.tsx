@@ -3,9 +3,14 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTelemetry } from '@/hooks/useTelemetry';
+import type { CelestialBody } from '@/types';
 
-export const TelemetryStream: React.FC = () => {
-    const logs = useTelemetry();
+interface TelemetryStreamProps {
+    body?: CelestialBody;
+}
+
+export const TelemetryStream: React.FC<TelemetryStreamProps> = ({ body }) => {
+    const logs = useTelemetry(body);
 
     return (
         <div className="flex flex-col gap-3 font-mono h-full overflow-hidden">

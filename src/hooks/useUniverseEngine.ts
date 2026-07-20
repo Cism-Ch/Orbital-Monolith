@@ -39,6 +39,7 @@ export function useUniverseEngine(options: UniverseEngineOptions = {}) {
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             rendererRef.current = renderer;
             containerRef.current.appendChild(renderer.domElement);
+            (window as any).__scene = sceneRef.current;
         }
 
         // Initialize Camera if not exists
@@ -85,8 +86,18 @@ export function useUniverseEngine(options: UniverseEngineOptions = {}) {
                 cancelAnimationFrame(animationFrameIdRef.current);
                 animationFrameIdRef.current = null;
             }
-            // Note: We don't dispose renderer here to keep it alive across parent re-renders
-            // Disposal should happen on true unmount if this hook is used as a singleton or managed elsewhere
+            // Clean up WebGLRenderer to avoid memory leaks and remove canvas from DOM
+            if (rendererRef.current) {
+                const canvas = rendererRef.current.domElement;
+                if (canvas && canvas.parentNode) {
+                    canvas.parentNode.removeChild(canvas);
+                }
+                rendererRef.current.dispose();
+                rendererRef.current = null;
+            }
+            if (cameraRef.current) {
+                cameraRef.current = null;
+            }
         };
     }, []); // Only run once on mount
 
