@@ -39,14 +39,14 @@ export const SceneControlPanel: React.FC = () => {
     }, [setOrientation, setZoom]);
 
     return (
-        <div className="fixed left-6 bottom-24 z-40 flex flex-col gap-3 pointer-events-auto select-none">
+        <div className="fixed left-4 bottom-20 md:left-6 md:bottom-24 z-40 flex flex-col gap-3 pointer-events-auto select-none">
             <motion.div
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                className="bg-black/90 backdrop-blur-3xl border border-white/10 rounded-[2rem] p-5 flex flex-col gap-5 shadow-2xl min-w-[210px]"
+                className="bg-black/90 backdrop-blur-3xl border border-white/10 rounded-[2rem] p-4 sm:p-5 flex flex-col gap-4 sm:gap-5 shadow-2xl min-w-[200px] sm:min-w-[210px]"
             >
                 {/* En-tête + Toggles rapides */}
-                <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center justify-between gap-3 sm:gap-4">
                     <div className="flex items-center gap-2">
                         <Layers size={12} className="text-[var(--accent-primary)]" />
                         <span className="font-mono text-[8px] uppercase tracking-widest text-white font-black">
@@ -58,7 +58,7 @@ export const SceneControlPanel: React.FC = () => {
                         <button
                             onClick={() => setShowGrid(!showGrid)}
                             title="Toggle Coordinate Grid (G)"
-                            className={`w-6 h-6 rounded-lg flex items-center justify-center text-[8px] font-black transition-all ${showGrid ? 'bg-[var(--accent-primary)] text-black' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
+                            className={`w-7 h-7 sm:w-6 sm:h-6 rounded-lg flex items-center justify-center text-[9px] sm:text-[8px] font-black transition-all cursor-pointer ${showGrid ? 'bg-[var(--accent-primary)] text-black' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
                         >
                             G
                         </button>
@@ -66,7 +66,7 @@ export const SceneControlPanel: React.FC = () => {
                         <button
                             onClick={() => setShowMilkyWay(!showMilkyWay)}
                             title="Toggle Milky Way (M)"
-                            className={`w-6 h-6 rounded-lg flex items-center justify-center text-[8px] font-black transition-all ${showMilkyWay ? 'bg-[var(--accent-primary)] text-black' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
+                            className={`w-7 h-7 sm:w-6 sm:h-6 rounded-lg flex items-center justify-center text-[9px] sm:text-[8px] font-black transition-all cursor-pointer ${showMilkyWay ? 'bg-[var(--accent-primary)] text-black' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
                         >
                             M
                         </button>
@@ -75,25 +75,25 @@ export const SceneControlPanel: React.FC = () => {
                             <button
                                 onClick={() => setShowConstellations(!showConstellations)}
                                 title="Toggle Constellations Lines"
-                                className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all ${showConstellations ? 'bg-[var(--accent-primary)] text-black' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
+                                className={`w-7 h-7 sm:w-6 sm:h-6 rounded-lg flex items-center justify-center transition-all cursor-pointer ${showConstellations ? 'bg-[var(--accent-primary)] text-black' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
                             >
-                                <Waypoints size={10} />
+                                <Waypoints size={12} />
                             </button>
                         )}
                         {/* Toggle Free Orbit Camera */}
                         <button
                             onClick={() => setPerspectiveMode(perspectiveMode === 'heliocentric' ? 'free' : 'heliocentric')}
                             title="Toggle Free Orbit Camera"
-                            className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all ${perspectiveMode === 'free' ? 'bg-[var(--accent-primary)] text-black' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
+                            className={`w-7 h-7 sm:w-6 sm:h-6 rounded-lg flex items-center justify-center transition-all cursor-pointer ${perspectiveMode === 'free' ? 'bg-[var(--accent-primary)] text-black' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
                         >
-                            <RotateCw size={10} className={perspectiveMode === 'free' ? 'animate-spin-slow' : ''} />
+                            <RotateCw size={12} className={perspectiveMode === 'free' ? 'animate-spin-slow' : ''} />
                         </button>
 
                         {/* Bouton de repliement / dépliement (Collapse toggle) */}
                         <button
                             onClick={() => setIsCollapsed(!isCollapsed)}
                             title={isCollapsed ? "Afficher les contrôles" : "Masquer les contrôles"}
-                            className="w-6 h-6 rounded-lg flex items-center justify-center bg-white/5 text-white/60 hover:text-white hover:bg-white/10 transition-all border border-white/5 ml-1"
+                            className="w-7 h-7 sm:w-6 sm:h-6 rounded-lg flex items-center justify-center bg-white/5 text-white/60 hover:text-white hover:bg-white/10 transition-all border border-white/5 ml-1 cursor-pointer"
                         >
                             {isCollapsed ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
                         </button>

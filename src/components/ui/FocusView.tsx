@@ -46,10 +46,10 @@ export const FocusView: React.FC<FocusViewProps> = ({ body, onClose }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-6 lg:p-12 font-mono pointer-events-auto"
+            className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 lg:p-12 font-mono pointer-events-auto"
         >
             {/* Backdrop avec flou et détection de clic pour fermeture */}
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-3xl cursor-pointer" onClick={onClose} />
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-3xl cursor-pointer" onClick={onClose} />
 
             {/* Immersive Scanning Effect */}
             <motion.div
@@ -63,27 +63,27 @@ export const FocusView: React.FC<FocusViewProps> = ({ body, onClose }) => {
                 initial={{ scale: 0.9, opacity: 0, y: 20 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 1.1, opacity: 0 }}
-                className="relative w-full h-full max-w-7xl monolith-panel !rounded-[4rem] !bg-black/80 flex flex-col lg:flex-row overflow-hidden border-white/10 shadow-[0_0_100px_rgba(0,0,0,0.8)]"
+                className="relative w-full h-full max-w-7xl monolith-panel !rounded-3xl sm:!rounded-[3rem] lg:!rounded-[4rem] !bg-black/90 flex flex-col lg:flex-row overflow-hidden border-white/10 shadow-[0_0_100px_rgba(0,0,0,0.8)]"
             >
                 {/* Close Button Capsule */}
                 <button
                     onClick={onClose}
-                    className="absolute top-8 right-8 w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 hover:border-white/20 transition-all z-50 group cursor-pointer"
+                    className="absolute top-4 right-4 sm:top-8 sm:right-8 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all z-50 group cursor-pointer"
                     title="Close Focus View (Esc)"
                 >
-                    <X size={20} className="group-hover:rotate-90 transition-transform" />
+                    <X size={18} className="group-hover:rotate-90 transition-transform" />
                 </button>
 
                 {/* Left Side: Visual & Core Data */}
-                <div className="flex-1 p-12 flex flex-col gap-6 relative justify-between overflow-y-auto custom-scrollbar">
-                    <div className="flex flex-col lg:flex-row gap-8 items-center lg:items-start">
+                <div className="flex-1 p-5 sm:p-8 lg:p-12 flex flex-col gap-6 relative justify-between overflow-y-auto custom-scrollbar">
+                    <div className="flex flex-col lg:flex-row gap-6 sm:gap-8 items-center lg:items-start">
                         {/* 3D Hologram Viewer */}
-                        <div className="flex-shrink-0 relative w-[280px] h-[320px] flex items-center justify-center bg-white/[0.01] border border-white/5 rounded-[3rem] overflow-hidden group shadow-[inset_0_0_50px_rgba(0,0,0,0.5)]">
-                            <div className="absolute inset-x-8 top-6 flex items-center justify-between border-b border-white/5 pb-2 text-[8px] font-black text-white/40 uppercase tracking-widest z-20 pointer-events-none">
+                        <div className="flex-shrink-0 relative w-full max-w-[240px] sm:w-[280px] h-[220px] sm:h-[320px] flex items-center justify-center bg-white/[0.01] border border-white/5 rounded-2xl sm:rounded-[3rem] overflow-hidden group shadow-[inset_0_0_50px_rgba(0,0,0,0.5)]">
+                            <div className="absolute inset-x-6 sm:inset-x-8 top-4 sm:top-6 flex items-center justify-between border-b border-white/5 pb-2 text-[8px] font-black text-white/40 uppercase tracking-widest z-20 pointer-events-none">
                                 <span>Holo_Projection</span>
                                 <span className="text-[var(--accent-primary)] animate-pulse">Scanning...</span>
                             </div>
-                            <CelestialBody3D body={body} size={240} showTitle={false} />
+                            <CelestialBody3D body={body} size={180} showTitle={false} />
                             
                             {/* HUD Brackets inside Hologram */}
                             <div className="absolute top-4 left-4 w-4 h-4 border-t border-l border-white/20 rounded-tl-md" />
@@ -93,19 +93,19 @@ export const FocusView: React.FC<FocusViewProps> = ({ body, onClose }) => {
                         </div>
 
                         {/* Text and Statistics */}
-                        <div className="flex-1 flex flex-col gap-6 w-full">
+                        <div className="flex-1 flex flex-col gap-5 sm:gap-6 w-full">
                             <div>
                                 <motion.h2
                                     initial={{ x: -20, opacity: 0 }}
                                     animate={{ x: 0, opacity: 1 }}
-                                    className="text-white text-4xl lg:text-5xl font-black uppercase tracking-tighter"
+                                    className="text-white text-2xl sm:text-4xl lg:text-5xl font-black uppercase tracking-tighter"
                                 >
                                     {body.name}
                                 </motion.h2>
-                                <div className="flex items-center gap-3 mt-2">
-                                    <span className="text-[var(--accent-primary)] text-[10px] font-black tracking-[0.4em] uppercase">{body.type}</span>
-                                    <span className="w-1.5 h-1.5 rounded-full bg-white/20" />
-                                    <span className="text-[#6c6c7a] text-[10px] font-bold tracking-[0.2em] uppercase">{body.scientificName}</span>
+                                <div className="flex items-center gap-2 sm:gap-3 mt-2 flex-wrap">
+                                    <span className="text-[var(--accent-primary)] text-[9px] sm:text-[10px] font-black tracking-[0.3em] uppercase">{body.type}</span>
+                                    <span className="w-1.5 h-1.5 rounded-full bg-white/20 hidden sm:inline" />
+                                    <span className="text-[#6c6c7a] text-[9px] sm:text-[10px] font-bold tracking-[0.2em] uppercase">{body.scientificName}</span>
                                 </div>
                             </div>
 

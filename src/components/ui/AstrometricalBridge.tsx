@@ -41,10 +41,10 @@ export const AstrometricalBridge: React.FC<AstrometricalBridgeProps> = ({
                 
                 <button
                     onClick={toggleMeasuringMode}
-                    className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-wider border transition-all flex items-center gap-1.5 ${
+                    className={`px-3.5 py-2 min-h-[44px] rounded-full text-[9px] font-black uppercase tracking-wider border transition-all flex items-center gap-1.5 cursor-pointer ${
                         isMeasuringMode
                             ? "bg-[var(--accent-primary)]/10 text-[var(--accent-primary)] border-[var(--accent-primary)]/30"
-                            : "bg-white/5 text-white/40 border-white/10 hover:text-white hover:border-white/20"
+                            : "bg-white/5 text-white/50 border-white/10 hover:text-white hover:border-white/20"
                     }`}
                     title="Toggle Interactive Laser Measurement"
                 >

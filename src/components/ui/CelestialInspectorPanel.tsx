@@ -60,20 +60,23 @@ export const CelestialInspectorPanel: React.FC = () => {
     return (
         <div className="h-full w-full flex pointer-events-none">
             {/* Zone gauche : transparente — le viewport 3D du layout est visible */}
-            <div className="flex-1" />
+            <div className="flex-1 hidden md:block" />
 
-            {/* Panneau droit : données et télémétrie */}
-            <aside className="w-[400px] flex flex-col gap-5 p-4 overflow-y-auto pointer-events-auto pr-6 pb-24 z-30">
+            {/* Panneau droit (PC) / Bottom Sheet (Mobile) */}
+            <aside className="fixed bottom-0 left-0 right-0 z-30 md:static md:w-[400px] flex flex-col gap-4 p-4 sm:p-5 overflow-y-auto pointer-events-auto max-h-[82vh] md:max-h-full rounded-t-[2.5rem] md:rounded-none border-t border-white/15 md:border-t-0 bg-black/95 md:bg-transparent backdrop-blur-3xl md:backdrop-blur-none shadow-[0_-10px_40px_rgba(0,0,0,0.8)] md:shadow-none pr-4 md:pr-6 pb-8 md:pb-24">
+                
+                {/* Poignée tactile de glissement (mobile uniquement) */}
+                <div className="w-10 h-1 rounded-full bg-white/20 mx-auto mb-1 flex-shrink-0 md:hidden" />
 
                 {/* ── Fiche d'analyse astre sélectionné / survolé ───────────── */}
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={displayedBody.id}
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
                         transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                        className="monolith-panel p-7 !bg-white/[0.025] border-white/5 space-y-6"
+                        className="monolith-panel p-5 sm:p-7 !bg-white/[0.025] border-white/5 space-y-5 sm:space-y-6"
                     >
                         {/* En-tête statut verrouillage/survol */}
                         <div className="flex items-center justify-between border-b border-white/5 pb-3">
@@ -191,7 +194,7 @@ export const CelestialInspectorPanel: React.FC = () => {
                                 setSelectedBody(displayedBody);
                                 setIsFocusMode(true);
                             }}
-                            className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl font-black text-[9px] uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                            className="w-full flex items-center justify-center gap-3 py-4 min-h-[44px] rounded-2xl font-black text-[9px] uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                             style={{
                                 background: `linear-gradient(135deg, ${displayedBody.colors[0]}, ${displayedBody.colors[1]})`,
                                 color: '#000',

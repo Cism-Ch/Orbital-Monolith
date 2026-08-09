@@ -28,7 +28,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     LayoutDashboard, Compass, Database, Settings,
     Search, LogOut, Activity, Sparkles,
-    Globe, Star, Ruler, Bell, X,
+    Globe, Star, Ruler, Bell, X, Menu,
     ChevronUp,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -78,6 +78,14 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
     // State pour la sidebar escamotable
     const [isSidebarHovered, setIsSidebarHovered] = useState(false);
+    // State pour le tiroir de navigation mobile
+    const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+
+    // Fermeture du drawer mobile lors d'un changement de page
+    useEffect(() => {
+        setIsMobileDrawerOpen(false);
+    }, [pathname]);
+
 
     // ── Navigation sidebar ────────────────────────────────────────────────────
 
@@ -163,12 +171,16 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
             {/* ═══════════════════════════════════════════════════════════════
                 VIEWPORT 3D — Canvas WebGL persistant (jamais démonté)
                 Position fixed, z-0 — en dessous de toute l'UI
+                touchAction: none empêche le défilement tactile indésirable du navigateur
             ═══════════════════════════════════════════════════════════════ */}
             <div
                 ref={engineContainerRef}
                 id="universe-viewport"
                 className="fixed inset-0 z-0"
-                style={{ pointerEvents: isOpaqueOverlay ? 'none' : 'auto' }}
+                style={{
+                    pointerEvents: isOpaqueOverlay ? 'none' : 'auto',
+                    touchAction: 'none',
+                }}
             >
                 {/* Vue 3D active — en overlay absolu sur le canvas */}
                 <div className="absolute inset-0 pointer-events-none">
@@ -185,29 +197,58 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
             <div className="scanline fixed pointer-events-none z-[199]" />
 
             {/* ═══════════════════════════════════════════════════════════════
-                SIDEBAR ESCAMOTABLE — Navigation principale (z-[100])
-                Cachée par défaut, révélée au survol du bord gauche.
+                BOUTON MENU MOBILE HAMBURGER (md:hidden) — z-[110]
             ═══════════════════════════════════════════════════════════════ */}
-            {/* Zone de détection du survol au bord gauche de l'écran */}
+            <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setIsMobileDrawerOpen(!isMobileDrawerOpen)}
+                className="md:hidden fixed top-3 left-3 z-[110] w-11 h-11 rounded-2xl bg-black/90 border border-white/20 backdrop-blur-2xl flex items-center justify-center text-[var(--accent-primary)] shadow-2xl pointer-events-auto cursor-pointer"
+                aria-label="Toggle Mobile Navigation"
+            >
+                {isMobileDrawerOpen ? <X size={20} /> : <Menu size={20} />}
+            </motion.button>
+
+            {/* Backdrop sombre flouté pour le tiroir mobile */}
+            <AnimatePresence>
+                {isMobileDrawerOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setIsMobileDrawerOpen(false)}
+                        className="fixed inset-0 bg-black/75 backdrop-blur-md z-[95] md:hidden pointer-events-auto"
+                    />
+                )}
+            </AnimatePresence>
+
+            {/* ═══════════════════════════════════════════════════════════════
+                SIDEBAR ESCAMOTABLE & DRAWER MOBILE — Navigation principale (z-[100])
+                Cachée par défaut sur PC (révélée au survol), coulissante sur mobile via bouton menu.
+            ═══════════════════════════════════════════════════════════════ */}
+            {/* Zone de détection du survol au bord gauche (desktop uniquement) */}
             <div
-                className="fixed top-0 left-0 bottom-0 w-6 z-[99] cursor-pointer group"
+                className="hidden md:block fixed top-0 left-0 bottom-0 w-6 z-[99] cursor-pointer group"
                 onMouseEnter={() => setIsSidebarHovered(true)}
                 title="Survoler pour ouvrir la navigation"
             >
-                {/* Poignée lumineuse néon sur le bord gauche */}
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-20 rounded-r-full bg-[var(--accent-primary)]/40 group-hover:bg-[var(--accent-primary)] group-hover:w-2 shadow.0_0_15px_var(--accent-primary)] transition-all duration-300 animate-pulse" />
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-20 rounded-r-full bg-[var(--accent-primary)]/40 group-hover:bg-[var(--accent-primary)] group-hover:w-2 shadow-[0_0_15px_var(--accent-primary)] transition-all duration-300 animate-pulse" />
             </div>
 
             <aside
                 onMouseEnter={() => setIsSidebarHovered(true)}
                 onMouseLeave={() => setIsSidebarHovered(false)}
-                className={`fixed top-0 left-0 bottom-0 z-[100] flex flex-col w-[72px] h-screen py-6 gap-6 items-center border-r border-white/10 bg-black/85 backdrop-blur-2xl transition-transform duration-300 ease-in-out shadow-2xl ${
-                    isSidebarHovered ? 'translate-x-0' : '-translate-x-full'
+                className={`fixed top-0 left-0 bottom-0 z-[100] flex flex-col w-[260px] md:w-[72px] h-screen py-6 gap-6 items-center border-r border-white/10 bg-black/95 md:bg-black/85 backdrop-blur-2xl transition-transform duration-300 ease-in-out shadow-2xl ${
+                    isMobileDrawerOpen
+                        ? 'translate-x-0'
+                        : isSidebarHovered
+                            ? 'translate-x-0'
+                            : '-translate-x-full'
                 }`}
             >
                 {/* Logo */}
-                <div className="relative group flex items-center justify-center">
-                    <Link href="/">
+                <div className="relative group flex items-center gap-3 w-full px-6 md:px-0 md:justify-center">
+                    <Link href="/" onClick={() => setIsMobileDrawerOpen(false)}>
                         <motion.div
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.95 }}
@@ -216,31 +257,37 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                             <Sparkles size={18} />
                         </motion.div>
                     </Link>
-                    <div className="absolute left-[52px] top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-xl bg-black/95 border border-[var(--accent-primary)]/30 backdrop-blur-2xl text-[var(--accent-primary)] font-mono font-bold uppercase tracking-wider whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-200 shadow-2xl z-[120] flex items-center gap-2" style={{ fontSize: 'var(--tooltip-font-size, 9px)' }}>
+                    <span className="md:hidden font-mono font-black text-xs uppercase tracking-widest text-[var(--accent-primary)]">
+                        Orbital Monolith
+                    </span>
+                    <div className="hidden md:flex absolute left-[52px] top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-xl bg-black/95 border border-[var(--accent-primary)]/30 backdrop-blur-2xl text-[var(--accent-primary)] font-mono font-bold uppercase tracking-wider whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-200 shadow-2xl z-[120] items-center gap-2" style={{ fontSize: 'var(--tooltip-font-size, 9px)' }}>
                         <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 rotate-45 bg-black border-l border-b border-[var(--accent-primary)]/30" />
                         Orbital Monolith
                     </div>
                 </div>
 
                 {/* Nav items */}
-                <nav className="flex flex-col gap-2 flex-1">
+                <nav className="flex flex-col gap-3 w-full px-4 md:px-0 md:items-center flex-1">
                     {navItems.map(item => {
                         const isActive = pathname === item.href;
                         return (
-                            <Link key={item.href} href={item.href} className="relative group flex items-center justify-center">
+                            <Link key={item.href} href={item.href} onClick={() => setIsMobileDrawerOpen(false)} className="relative group flex items-center gap-3.5 w-full md:w-auto md:justify-center min-h-[44px] px-3 md:px-0 rounded-2xl hover:bg-white/5 md:hover:bg-transparent">
                                 <motion.div
-                                    whileHover={{ scale: 1.1 }}
+                                    whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
-                                    className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all cursor-pointer ${isActive
+                                    className={`w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 transition-all cursor-pointer ${isActive
                                         ? 'bg-[var(--accent-primary)]/15 text-[var(--accent-primary)] border border-[var(--accent-primary)]/30 shadow-[0_0_20px_rgba(77,238,234,0.15)]'
-                                        : 'text-white/30 hover:text-white/70 hover:bg-white/5'
+                                        : 'text-white/40 hover:text-white/80 hover:bg-white/5'
                                         }`}
                                 >
                                     <item.icon size={18} />
                                 </motion.div>
+                                <span className="md:hidden font-mono text-[11px] font-bold uppercase tracking-wider text-white">
+                                    {item.label}
+                                </span>
 
-                                {/* Tooltip personnalisé verticalement centré avec flèche */}
-                                <div className="absolute left-[52px] top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-xl bg-black/95 border border-white/15 backdrop-blur-2xl text-white font-mono font-bold uppercase tracking-wider whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-200 shadow-2xl z-[120] flex items-center gap-2" style={{ fontSize: 'var(--tooltip-font-size, 9px)' }}>
+                                {/* Tooltip PC */}
+                                <div className="hidden md:flex absolute left-[52px] top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-xl bg-black/95 border border-white/15 backdrop-blur-2xl text-white font-mono font-bold uppercase tracking-wider whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-200 shadow-2xl z-[120] items-center gap-2" style={{ fontSize: 'var(--tooltip-font-size, 9px)' }}>
                                     <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 rotate-45 bg-black border-l border-b border-white/15" />
                                     <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)]" />
                                     {item.label}
@@ -251,22 +298,25 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 </nav>
 
                 {/* Actions bas sidebar */}
-                <div className="flex flex-col gap-2 relative">
+                <div className="flex flex-col gap-3 w-full px-4 md:px-0 md:items-center relative">
                     {/* Notifications Button */}
-                    <div className="relative group flex items-center justify-center notif-toggle-btn">
+                    <div className="relative group flex items-center gap-3.5 w-full md:w-auto md:justify-center notif-toggle-btn">
                         <motion.div
-                            whileHover={{ scale: 1.1 }}
+                            whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => setShowNotifications(!showNotifications)}
-                            className={`w-10 h-10 rounded-2xl flex items-center justify-center cursor-pointer relative transition-all ${showNotifications ? 'bg-[var(--accent-primary)]/20 text-[var(--accent-primary)] border border-[var(--accent-primary)]/40 shadow-[0_0_15px_rgba(77,238,234,0.2)]' : 'text-white/30 hover:text-white/70 hover:bg-white/5'}`}
+                            className={`w-10 h-10 rounded-2xl flex items-center justify-center cursor-pointer relative transition-all ${showNotifications ? 'bg-[var(--accent-primary)]/20 text-[var(--accent-primary)] border border-[var(--accent-primary)]/40 shadow-[0_0_15px_rgba(77,238,234,0.2)]' : 'text-white/40 hover:text-white/80 hover:bg-white/5'}`}
                         >
                             <Bell size={16} />
                             <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-[var(--accent-primary)] rounded-full animate-ping" />
                         </motion.div>
+                        <span className="md:hidden font-mono text-[11px] font-bold uppercase tracking-wider text-white cursor-pointer" onClick={() => setShowNotifications(!showNotifications)}>
+                            Alerts ({systemNotifications.length})
+                        </span>
 
-                        {/* Tooltip Notification centré avec flèche */}
+                        {/* Tooltip Notification PC */}
                         {!showNotifications && (
-                            <div className="absolute left-[52px] top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-xl bg-black/95 border border-white/15 backdrop-blur-2xl text-white font-mono font-bold uppercase tracking-wider whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-200 shadow-2xl z-[120] flex items-center gap-2" style={{ fontSize: 'var(--tooltip-font-size, 9px)' }}>
+                            <div className="hidden md:flex absolute left-[52px] top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-xl bg-black/95 border border-white/15 backdrop-blur-2xl text-white font-mono font-bold uppercase tracking-wider whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-200 shadow-2xl z-[120] items-center gap-2" style={{ fontSize: 'var(--tooltip-font-size, 9px)' }}>
                                 <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 rotate-45 bg-black border-l border-b border-white/15" />
                                 <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)] animate-pulse" />
                                 System Notifications
@@ -275,16 +325,19 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     </div>
 
                     {/* Télémétrie Shortcut */}
-                    <div className="relative group flex items-center justify-center">
+                    <div className="relative group flex items-center gap-3.5 w-full md:w-auto md:justify-center">
                         <motion.div
-                            whileHover={{ scale: 1.1 }}
+                            whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            onClick={() => router.push('/dashboard')}
-                            className="w-10 h-10 rounded-2xl flex items-center justify-center text-white/30 hover:text-[var(--accent-primary)] hover:bg-white/5 cursor-pointer"
+                            onClick={() => { router.push('/dashboard'); setIsMobileDrawerOpen(false); }}
+                            className="w-10 h-10 rounded-2xl flex items-center justify-center text-white/40 hover:text-[var(--accent-primary)] hover:bg-white/5 cursor-pointer"
                         >
                             <Activity size={16} />
                         </motion.div>
-                        <div className="absolute left-[52px] top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-xl bg-black/95 border border-white/15 backdrop-blur-2xl text-white font-mono font-bold uppercase tracking-wider whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-200 shadow-2xl z-[120] flex items-center gap-2" style={{ fontSize: 'var(--tooltip-font-size, 9px)' }}>
+                        <span className="md:hidden font-mono text-[11px] font-bold uppercase tracking-wider text-white cursor-pointer" onClick={() => { router.push('/dashboard'); setIsMobileDrawerOpen(false); }}>
+                            Live Telemetry
+                        </span>
+                        <div className="hidden md:flex absolute left-[52px] top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-xl bg-black/95 border border-white/15 backdrop-blur-2xl text-white font-mono font-bold uppercase tracking-wider whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-200 shadow-2xl z-[120] items-center gap-2" style={{ fontSize: 'var(--tooltip-font-size, 9px)' }}>
                             <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 rotate-45 bg-black border-l border-b border-white/15" />
                             <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)] animate-pulse" />
                             Live Telemetry
@@ -292,16 +345,19 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     </div>
 
                     {/* Quitter */}
-                    <div className="relative group flex items-center justify-center">
+                    <div className="relative group flex items-center gap-3.5 w-full md:w-auto md:justify-center">
                         <motion.div
-                            whileHover={{ scale: 1.1 }}
+                            whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            onClick={() => router.push('/')}
-                            className="w-10 h-10 rounded-2xl flex items-center justify-center text-white/20 hover:text-red-400 hover:bg-white/5 cursor-pointer"
+                            onClick={() => { router.push('/'); setIsMobileDrawerOpen(false); }}
+                            className="w-10 h-10 rounded-2xl flex items-center justify-center text-white/30 hover:text-red-400 hover:bg-white/5 cursor-pointer"
                         >
                             <LogOut size={16} />
                         </motion.div>
-                        <div className="absolute left-[52px] top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-xl bg-black/95 border border-red-500/20 backdrop-blur-2xl text-red-400 font-mono font-bold uppercase tracking-wider whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-200 shadow-2xl z-[120] flex items-center gap-2" style={{ fontSize: 'var(--tooltip-font-size, 9px)' }}>
+                        <span className="md:hidden font-mono text-[11px] font-bold uppercase tracking-wider text-red-400 cursor-pointer" onClick={() => { router.push('/'); setIsMobileDrawerOpen(false); }}>
+                            Exit Dashboard
+                        </span>
+                        <div className="hidden md:flex absolute left-[52px] top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-xl bg-black/95 border border-red-500/20 backdrop-blur-2xl text-red-400 font-mono font-bold uppercase tracking-wider whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-200 shadow-2xl z-[120] items-center gap-2" style={{ fontSize: 'var(--tooltip-font-size, 9px)' }}>
                             <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 rotate-45 bg-black border-l border-b border-red-500/20" />
                             <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
                             Exit Dashboard
@@ -312,17 +368,17 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
             {/* ═══════════════════════════════════════════════════════════════
                 PANNEAU DE NOTIFICATIONS FLOTTANT — Indépendant de la sidebar (z-[150])
-                Flotte proprement à côté de la sidebar (left-20 bottom-12)
+                Sur mobile : centré bas de page. Sur PC : à côté de la sidebar.
             ═══════════════════════════════════════════════════════════════ */}
             <AnimatePresence>
                 {showNotifications && (
                     <motion.div
                         ref={notifRef}
-                        initial={{ opacity: 0, x: -16, scale: 0.95 }}
-                        animate={{ opacity: 1, x: 0, scale: 1 }}
-                        exit={{ opacity: 0, x: -16, scale: 0.95 }}
+                        initial={{ opacity: 0, y: 16, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 16, scale: 0.95 }}
                         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                        className="fixed bottom-12 left-20 w-80 monolith-panel !bg-black/95 !backdrop-blur-3xl p-5 border border-white/15 shadow-[0_10px_40px_rgba(0,0,0,0.8)] z-[150] space-y-4 pointer-events-auto select-none"
+                        className="fixed bottom-20 left-4 right-4 sm:left-20 sm:right-auto sm:w-80 monolith-panel !bg-black/95 !backdrop-blur-3xl p-5 border border-white/15 shadow-[0_10px_40px_rgba(0,0,0,0.8)] z-[150] space-y-4 pointer-events-auto select-none"
                     >
                         <div className="flex items-center justify-between border-b border-white/10 pb-3">
                             <div className="flex items-center gap-2.5">
@@ -331,14 +387,14 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                             </div>
                             <button
                                 onClick={() => setShowNotifications(false)}
-                                className="w-5 h-5 rounded-full bg-white/5 hover:bg-white/15 text-white/50 hover:text-white flex items-center justify-center text-[10px] transition-colors cursor-pointer"
+                                className="w-6 h-6 rounded-full bg-white/5 hover:bg-white/15 text-white/50 hover:text-white flex items-center justify-center text-[10px] transition-colors cursor-pointer"
                                 title="Close Alerts"
                             >
                                 ✕
                             </button>
                         </div>
 
-                        <div className="space-y-2.5 max-h-[320px] overflow-y-auto pr-1">
+                        <div className="space-y-2.5 max-h-[280px] sm:max-h-[320px] overflow-y-auto pr-1">
                             {systemNotifications.map(notif => (
                                 <div key={notif.id} className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/8 space-y-1.5 hover:border-[var(--accent-primary)]/30 hover:bg-white/[0.05] transition-all">
                                     <div className="flex justify-between items-center">
@@ -356,20 +412,20 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
             {/* ═══════════════════════════════════════════════════════════════
                 HEADER — Barre de recherche et status (z-50)
             ═══════════════════════════════════════════════════════════════ */}
-            <div className="fixed top-0 left-6 right-0 z-50 p-4 flex items-center gap-4 pointer-events-none">
+            <div className="fixed top-0 left-0 right-0 z-50 p-3 sm:p-4 pl-16 md:pl-6 flex items-center gap-3 sm:gap-4 pointer-events-none">
                 {/* Barre de recherche */}
-                <div className="relative pointer-events-auto">
-                    <div className="flex items-center gap-3 bg-black/60 backdrop-blur-2xl border border-white/8 rounded-2xl px-4 py-2.5 w-80">
+                <div className="relative pointer-events-auto flex-1 max-w-[220px] xs:max-w-[280px] sm:w-80 sm:flex-none">
+                    <div className="flex items-center gap-2.5 bg-black/70 backdrop-blur-2xl border border-white/15 rounded-2xl px-3 sm:px-4 py-2 sm:py-2.5 w-full">
                         <Search size={14} className="text-[var(--accent-primary)] flex-shrink-0" />
                         <input
                             type="text"
                             value={searchQuery}
                             onChange={e => setSearchQuery(e.target.value)}
-                            placeholder="Search celestial body..."
-                            className="bg-transparent text-white text-[11px] font-bold placeholder-white/20 outline-none flex-1 tracking-wide"
+                            placeholder="Search body..."
+                            className="bg-transparent text-white text-[10px] sm:text-[11px] font-bold placeholder-white/30 outline-none flex-1 tracking-wide w-full"
                         />
                         {searchQuery && (
-                            <button onClick={() => setSearchQuery('')} className="text-white/30 hover:text-white transition-colors">
+                            <button onClick={() => setSearchQuery('')} className="text-white/40 hover:text-white transition-colors p-1">
                                 <X size={12} />
                             </button>
                         )}
@@ -388,7 +444,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                                     <button
                                         key={body.id}
                                         onClick={() => handleSelectBody(body)}
-                                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors text-left border-b border-white/5 last:border-0"
+                                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors text-left border-b border-white/5 last:border-0 min-h-[44px]"
                                     >
                                         <div className="w-2 h-2 rounded-full flex-shrink-0"
                                             style={{ backgroundColor: body.colors[0] }} />
@@ -404,14 +460,14 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     </AnimatePresence>
                 </div>
 
-                {/* Corps survolé au vol */}
+                {/* Corps survolé au vol (masqué sur très petit écran pour lisibilité) */}
                 <AnimatePresence>
                     {hoveredBody && !searchQuery && (
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.95 }}
-                            className="pointer-events-none flex items-center gap-3 bg-black/70 backdrop-blur-xl px-4 py-2.5 rounded-2xl border border-white/8"
+                            className="hidden sm:flex pointer-events-none items-center gap-3 bg-black/70 backdrop-blur-xl px-4 py-2.5 rounded-2xl border border-white/8"
                         >
                             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: hoveredBody.colors[0] }} />
                             <span className="text-[10px] font-black text-white uppercase tracking-wide">{hoveredBody.name}</span>
@@ -421,15 +477,17 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 </AnimatePresence>
 
                 {/* Status GAIA */}
-                <div className="ml-auto flex items-center gap-3 pointer-events-none">
-                    <div className="flex items-center gap-2 bg-black/50 px-3 py-1.5 rounded-full border border-white/5">
+                <div className="ml-auto flex items-center gap-2 sm:gap-3 pointer-events-none">
+                    <div className="flex items-center gap-1.5 sm:gap-2 bg-black/60 backdrop-blur-md px-2.5 sm:px-3 py-1.5 rounded-full border border-white/8">
                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        <span className="text-[8px] font-black text-white/40 uppercase tracking-widest">GAIA_NODE_01 :: ONLINE</span>
+                        <span className="text-[7px] sm:text-[8px] font-black text-white/50 uppercase tracking-widest">
+                            <span className="hidden xs:inline">GAIA_NODE_01 :: </span>ONLINE
+                        </span>
                     </div>
                     {isMeasuringMode && (
-                        <div className="flex items-center gap-2 bg-[var(--accent-primary)]/10 px-3 py-1.5 rounded-full border border-[var(--accent-primary)]/30">
+                        <div className="hidden xs:flex items-center gap-2 bg-[var(--accent-primary)]/10 px-3 py-1.5 rounded-full border border-[var(--accent-primary)]/30">
                             <Ruler size={10} className="text-[var(--accent-primary)]" />
-                            <span className="text-[8px] font-black text-[var(--accent-primary)] uppercase tracking-widest">Measuring Mode</span>
+                            <span className="text-[8px] font-black text-[var(--accent-primary)] uppercase tracking-widest">Measuring</span>
                         </div>
                     )}
                 </div>
@@ -451,12 +509,12 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
             </main>
 
             {/* ═══════════════════════════════════════════════════════════════
-                BOÎTE À OUTILS FLOTTANTE — Coin bas-gauche, z-60
-                Auto-dépliante au focus (hover/focus).
+                BOÎTE À OUTILS FLOTTANTE — Coin bas-gauche, z-40
+                Auto-dépliante au focus (hover/touch).
                 Toggle SOLAR/SKY, mode mesure, et actions rapides.
             ═══════════════════════════════════════════════════════════════ */}
             <div
-                className="fixed bottom-8 left-6 z-40 flex flex-col gap-2 items-start"
+                className="fixed bottom-4 left-4 md:bottom-8 md:left-6 z-40 flex flex-col gap-2 items-start pointer-events-auto"
                 onMouseEnter={() => setToolboxOpen(true)}
                 onMouseLeave={() => setToolboxOpen(false)}
             >

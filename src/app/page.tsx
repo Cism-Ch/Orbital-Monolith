@@ -242,19 +242,20 @@ export default function LandingPage() {
                                 initial={{ opacity: 0, y: 30 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.6, duration: 1 }}
+                                className="px-4"
                             >
                                 <h1
-                                    className={`text-[clamp(5rem,12vw,9rem)] font-black uppercase leading-none tracking-tighter text-white transition-all ${glitchActive ? 'skew-x-2 text-[var(--accent-primary)]' : ''}`}
+                                    className={`text-[clamp(2.75rem,10vw,9rem)] font-black uppercase leading-none tracking-tighter text-white transition-all ${glitchActive ? 'skew-x-2 text-[var(--accent-primary)]' : ''}`}
                                     style={{ textShadow: glitchActive ? '4px 0 0 rgba(255,0,100,0.5), -4px 0 0 rgba(0,100,255,0.5)' : 'none' }}
                                 >
                                     Orbital
                                 </h1>
-                                <h1 className="text-[clamp(5rem,12vw,9rem)] font-black uppercase leading-none tracking-tighter text-[var(--accent-primary)]"
+                                <h1 className="text-[clamp(2.75rem,10vw,9rem)] font-black uppercase leading-none tracking-tighter text-[var(--accent-primary)]"
                                     style={{ textShadow: '0 0 60px rgba(77, 238, 234, 0.3)' }}
                                 >
                                     Monolith
                                 </h1>
-                                <p className="text-white/25 text-[10px] font-black tracking-[0.6em] uppercase mt-6">
+                                <p className="text-white/40 text-[8px] sm:text-[10px] font-black tracking-[0.3em] sm:tracking-[0.6em] uppercase mt-4 sm:mt-6 max-w-xl mx-auto">
                                     Next-Gen Stellar Dynamics & Deep Space Visualization Engine
                                 </p>
                             </motion.div>
@@ -264,13 +265,13 @@ export default function LandingPage() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 1.0, duration: 0.8 }}
-                                className="grid grid-cols-4 gap-6"
+                                className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6 w-full max-w-4xl px-2"
                             >
                                 {METRICS.map(({ label, value, suffix, icon: Icon }) => (
-                                    <div key={label} className="flex flex-col items-center gap-2 bg-white/5 backdrop-blur-xl border border-white/8 rounded-2xl px-6 py-5">
+                                    <div key={label} className="flex flex-col items-center gap-1.5 sm:gap-2 bg-white/5 backdrop-blur-xl border border-white/8 rounded-2xl p-4 sm:px-6 sm:py-5">
                                         <Icon size={16} className="text-[var(--accent-primary)]" />
-                                        <p className="text-white text-3xl font-black">{value}</p>
-                                        <p className="text-[#6c6c7a] text-[7px] font-black uppercase tracking-[0.3em] text-center leading-tight">
+                                        <p className="text-white text-2xl sm:text-3xl font-black">{value}</p>
+                                        <p className="text-[#6c6c7a] text-[7px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] text-center leading-tight">
                                             {label}<br />
                                             <span className="text-[var(--accent-primary)]">{suffix}</span>
                                         </p>
@@ -283,13 +284,13 @@ export default function LandingPage() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 1.3, duration: 0.8 }}
-                                className="flex flex-col items-center gap-6"
+                                className="flex flex-col items-center gap-4 sm:gap-6 w-full max-w-sm px-4"
                             >
-                                <Link href="/onboarding">
+                                <Link href="/onboarding" className="w-full">
                                     <motion.button
-                                        whileHover={{ scale: 1.05, boxShadow: '0 0 40px rgba(77, 238, 234, 0.3)' }}
-                                        whileTap={{ scale: 0.95 }}
-                                        className="flex items-center gap-4 bg-[var(--accent-primary)] text-black font-black text-[9px] uppercase tracking-[0.4em] px-12 py-5 rounded-full"
+                                        whileHover={{ scale: 1.03, boxShadow: '0 0 40px rgba(77, 238, 234, 0.3)' }}
+                                        whileTap={{ scale: 0.97 }}
+                                        className="w-full flex items-center justify-center gap-3 sm:gap-4 bg-[var(--accent-primary)] text-black font-black text-[9px] uppercase tracking-[0.3em] sm:tracking-[0.4em] px-6 sm:px-12 py-4 sm:py-5 min-h-[48px] rounded-full cursor-pointer"
                                     >
                                         <Power size={14} />
                                         Initialize System_Core
@@ -297,11 +298,11 @@ export default function LandingPage() {
                                     </motion.button>
                                 </Link>
 
-                                <Link href="/dashboard">
+                                <Link href="/dashboard" className="w-full">
                                     <motion.button
                                         whileHover={{ scale: 1.03 }}
                                         whileTap={{ scale: 0.97 }}
-                                        className="flex items-center gap-3 bg-white/5 border border-white/10 hover:border-[var(--accent-primary)]/30 text-white/50 hover:text-white font-black text-[8px] uppercase tracking-[0.3em] px-10 py-4 rounded-full backdrop-blur-lg transition-all"
+                                        className="w-full flex items-center justify-center gap-3 bg-white/5 border border-white/10 hover:border-[var(--accent-primary)]/30 text-white/60 hover:text-white font-black text-[8px] uppercase tracking-[0.3em] px-6 sm:px-10 py-3.5 sm:py-4 min-h-[44px] rounded-full backdrop-blur-lg transition-all cursor-pointer"
                                     >
                                         Skip Onboarding
                                         <ChevronRight size={12} />
@@ -309,17 +310,17 @@ export default function LandingPage() {
                                 </Link>
 
                                 {/* Status système */}
-                                <div className="flex items-center gap-6 text-[8px] text-[#6c6c7a] font-black uppercase tracking-widest">
+                                <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-[7.5px] sm:text-[8px] text-[#6c6c7a] font-black uppercase tracking-widest pt-2">
                                     <div className="flex items-center gap-2">
                                         <Wifi size={10} className="text-emerald-400" />
                                         <span>Node Online</span>
                                     </div>
-                                    <div className="w-px h-4 bg-white/10" />
+                                    <div className="w-px h-3 bg-white/10" />
                                     <div className="flex items-center gap-2">
                                         <Cpu size={10} className="text-[var(--accent-primary)]" />
                                         <span>WebGL2 Ready</span>
                                     </div>
-                                    <div className="w-px h-4 bg-white/10" />
+                                    <div className="hidden xs:block w-px h-3 bg-white/10" />
                                     <div className="flex items-center gap-2">
                                         <Shield size={10} className="text-purple-400" />
                                         <span>Secure Channel</span>
@@ -331,10 +332,10 @@ export default function LandingPage() {
                 </AnimatePresence>
 
                 {/* Version badge */}
-                <div className="fixed bottom-8 right-8 text-[8px] text-[#6c6c7a] font-black uppercase tracking-widest flex items-center gap-3">
+                <div className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 text-[7px] sm:text-[8px] text-[#6c6c7a] font-black uppercase tracking-widest flex flex-col sm:flex-row items-end sm:items-center gap-1 sm:gap-3">
                     <span>v3.0.0_STABLE</span>
-                    <span className="w-px h-3 bg-white/10" />
-                    <span>NASA JPL · ESA · Gaia DR3 · IAU</span>
+                    <span className="hidden sm:inline w-px h-3 bg-white/10" />
+                    <span className="opacity-60 sm:opacity-100">NASA JPL · ESA · Gaia DR3</span>
                 </div>
             </div>
         </div>

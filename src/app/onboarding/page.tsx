@@ -114,7 +114,7 @@ export default function OnboardingPage() {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => router.push('/dashboard')}
-                                className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white text-[8px] font-black uppercase tracking-widest transition-all"
+                                className="flex items-center gap-2 px-6 py-2.5 min-h-[44px] rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white text-[8px] font-black uppercase tracking-widest transition-all cursor-pointer"
                             >
                                 <FastForward size={10} className="text-[var(--accent-primary)]" />
                                 Skip Sequence // Fast Forward

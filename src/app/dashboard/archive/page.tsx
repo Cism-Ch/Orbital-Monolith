@@ -76,21 +76,21 @@ export default function ArchivePage() {
     return (
         <div className="w-full h-full flex flex-col gap-8 p-4 pointer-events-auto pb-24">
             {/* Header Section */}
-            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 px-4">
-                <div className="bg-black/60 backdrop-blur-2xl p-6 rounded-3xl border border-white/10">
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 sm:gap-6 px-2 sm:px-4">
+                <div className="bg-black/60 backdrop-blur-2xl p-5 sm:p-6 rounded-3xl border border-white/10">
                     <div className="flex items-center gap-3 mb-2">
                         <Database size={18} className="text-[var(--accent-primary)]" />
                         <span className="font-mono text-[9px] uppercase font-black text-white/40 tracking-[0.4em]">Integrated_Archives</span>
                     </div>
-                    <h2 className="text-4xl font-black uppercase text-white tracking-widest">Gaia_Repository</h2>
+                    <h2 className="text-2xl sm:text-4xl font-black uppercase text-white tracking-widest">Gaia_Repository</h2>
                 </div>
 
-                <div className="flex gap-2 bg-black/70 backdrop-blur-3xl p-2 rounded-full border border-white/10 shadow-2xl">
+                <div className="flex gap-2 bg-black/70 backdrop-blur-3xl p-2 rounded-2xl sm:rounded-full border border-white/10 shadow-2xl overflow-x-auto no-scrollbar max-w-full">
                     {['ALL', 'SYSTEM', 'GALAXY', 'TECH'].map((cat) => (
                         <button
                             key={cat}
                             onClick={() => setFilter(cat)}
-                            className={`px-6 py-2.5 rounded-full text-[9px] font-black uppercase tracking-widest transition-all ${filter === cat
+                            className={`px-4 sm:px-6 py-2.5 min-h-[44px] rounded-xl sm:rounded-full text-[9px] font-black uppercase tracking-widest whitespace-nowrap transition-all cursor-pointer ${filter === cat
                                     ? 'bg-[var(--accent-primary)] text-black shadow-lg shadow-[var(--accent-primary)]/20'
                                     : 'text-[#6c6c7a] hover:text-white hover:bg-white/5'
                                 }`}
@@ -102,7 +102,7 @@ export default function ArchivePage() {
             </div>
 
             {/* Content Grid */}
-            <div className="flex-1 overflow-y-auto px-4 pb-12">
+            <div className="flex-1 overflow-y-auto px-2 sm:px-4 pb-12">
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     <AnimatePresence mode="popLayout">
                         {filteredDocs.map((doc, i) => (
@@ -113,11 +113,11 @@ export default function ArchivePage() {
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.9 }}
                                 transition={{ delay: i * 0.08 }}
-                                className="monolith-panel !bg-black/80 !backdrop-blur-3xl !rounded-[2.5rem] p-8 group hover:border-[var(--accent-primary)]/40 transition-all flex flex-col gap-6 shadow-2xl"
+                                className="monolith-panel !bg-black/80 !backdrop-blur-3xl !rounded-[2.5rem] p-6 sm:p-8 group hover:border-[var(--accent-primary)]/40 transition-all flex flex-col gap-6 shadow-2xl"
                             >
                                 <div className="flex justify-between items-start">
-                                    <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[var(--accent-primary)] group-hover:scale-110 group-hover:bg-[var(--accent-primary)] group-hover:text-black transition-all">
-                                        <BookOpen size={24} />
+                                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[var(--accent-primary)] group-hover:scale-110 group-hover:bg-[var(--accent-primary)] group-hover:text-black transition-all">
+                                        <BookOpen size={22} />
                                     </div>
                                     <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/5">
                                         <Sparkles size={10} className="text-[var(--accent-primary)]" />
@@ -126,7 +126,7 @@ export default function ArchivePage() {
                                 </div>
 
                                 <div className="space-y-3">
-                                    <h3 className="text-xl font-black text-white uppercase tracking-tight group-hover:text-[var(--accent-primary)] transition-colors">{doc.title}</h3>
+                                    <h3 className="text-lg sm:text-xl font-black text-white uppercase tracking-tight group-hover:text-[var(--accent-primary)] transition-colors">{doc.title}</h3>
                                     <p className="text-[#6c6c7a] text-xs leading-relaxed font-bold">
                                         {doc.intel}
                                     </p>
@@ -147,7 +147,7 @@ export default function ArchivePage() {
                                     </div>
                                     <button 
                                         onClick={() => handleReadIntel(doc.id)}
-                                        className="flex items-center gap-2 text-[9px] font-black uppercase text-[var(--accent-primary)] hover:gap-4 transition-all"
+                                        className="flex items-center gap-2 min-h-[44px] px-3 py-2 rounded-xl text-[9px] font-black uppercase text-[var(--accent-primary)] hover:bg-[var(--accent-primary)]/10 hover:gap-3 transition-all cursor-pointer"
                                     >
                                         Read_Intel <ExternalLink size={12} />
                                     </button>
