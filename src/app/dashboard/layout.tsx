@@ -191,8 +191,6 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 </div>
             </div>
 
-            {/* Grain cinématique (texture) */}
-            <div className="grain fixed inset-0 z-[200] pointer-events-none" />
             {/* Scanline CRT */}
             <div className="scanline fixed pointer-events-none z-[199]" />
 

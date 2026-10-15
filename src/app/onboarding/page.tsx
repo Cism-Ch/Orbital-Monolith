@@ -165,8 +165,7 @@ export default function OnboardingPage() {
 
     return (
         <div className="fixed inset-0 bg-[#030305] text-[#e1e1e6] font-mono flex flex-col justify-between overflow-x-hidden overflow-y-auto select-none p-3 sm:p-6 lg:p-8">
-            {/* Visual scanline, grain & aerospace ambient glow */}
-            <div className="grain opacity-20 pointer-events-none" />
+            {/* Visual scanline & aerospace ambient glow */}
             <div className="scanline pointer-events-none" />
 
             {/* Central hyper-spatial warp transition effect */}

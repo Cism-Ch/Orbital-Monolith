@@ -33,7 +33,6 @@ export default function RootLayout({
     return (
         <html lang="fr" className="bg-[#050506]">
             <body className={`${inter.variable} ${jetbrainsMono.variable} antialiased font-sans`}>
-                <div className="grain" />
                 <div className="scanline" />
                 {children}
             </body>

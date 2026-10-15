@@ -25,8 +25,10 @@ Fichier de directives et de règles d'ingénierie logicielle pour les agents AI 
 ## 🎨 2. Design System & Règles UI/UX
 
 1. **Tokens Sémantiques & CSS** :
-   - Toujours utiliser les tokens du Design System définis dans `globals.css` (`--accent-primary`, `--basalt-surface`, `.monolith-panel`, `.monolith-card`).
+   - Toujours utiliser les tokens du Design System définis dans `globals.css` (`--accent-primary`, `--basalt-surface` [Obsidian Glass haute netteté sans grain], `.monolith-panel`, `.monolith-card`).
    - Ne pas utiliser de couleurs brutes ad-hoc dans le code sans passer par les tokens sémantiques ou l'accentuation d'astre.
+   - Ne pas réintroduire de filtres de grain ou de bruit de texture qui nuisent à la netteté et à la lisibilité de l'interface.
+
 
 2. **Normes Mobile-First & Ergonomie Tactile** :
    - **Tactile Target** : Toutes les zones interactives (boutons, filtres, commutateurs) doivent posséder une hauteur minimale de **$44\times 44\text{px}$** (`min-h-[44px]`).

@@ -253,7 +253,7 @@ export default function SettingsPage() {
                                 <div className="flex items-center justify-between gap-3">
                                     <div>
                                         <span className="text-[9px] sm:text-[10px] font-black text-white uppercase tracking-wider block">Hyper-Spatial Rendering</span>
-                                        <span className="text-[7.5px] sm:text-[8px] font-mono text-[#6c6c7a]">Effets CRT, grain cinématographique & scanlines</span>
+                                        <span className="text-[7.5px] sm:text-[8px] font-mono text-[#6c6c7a]">Effets CRT et scanlines télémétriques</span>
                                     </div>
                                     <button 
                                         onClick={() => setHyperSpatialRendering(!hyperSpatialRendering)}
@@ -299,7 +299,7 @@ export default function SettingsPage() {
                             {/* Live Glassmorphism Preview */}
                             <div 
                                 className="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border border-white/15 space-y-1.5 transition-all shadow-xl"
-                                style={{ backgroundColor: `rgba(20, 20, 23, ${interfaceOpacity / 100})` }}
+                                style={{ backgroundColor: `rgba(8, 9, 14, ${interfaceOpacity / 100})` }}
                             >
                                 <span className="text-[7.5px] sm:text-[8px] font-mono uppercase text-[var(--accent-primary)] font-black tracking-widest block">Live Visual Core Preview</span>
                                 <p className="text-[8.5px] sm:text-[9px] text-white/80 font-mono leading-tight">

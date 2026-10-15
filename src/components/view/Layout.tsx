@@ -20,8 +20,7 @@ export const Layout: React.FC<LayoutProps> = ({
     footer
 }) => {
     return (
-        <div className="w-screen h-screen p-6 flex flex-col gap-6 relative overflow-hidden bg-[#050506]">
-            <div className="grain" />
+        <div className="w-screen h-screen p-6 flex flex-col gap-6 relative overflow-hidden bg-[#030305]">
             <div className="scanline" />
 
             {/* Header */}
