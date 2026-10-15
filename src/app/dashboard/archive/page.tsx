@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Database, BookOpen, ExternalLink, Sparkles, Shield, Compass, Radio, Target } from 'lucide-react';
+import { Database, BookOpen, ExternalLink, Sparkles, Shield, Compass, Target } from 'lucide-react';
 import { useDashboard } from '@/lib/DashboardContext';
 import { useRouter } from 'next/navigation';
 import { SOLAR_SYSTEM, STARS } from '@/constants';
@@ -12,7 +12,7 @@ export default function ArchivePage() {
     const [filter, setFilter] = useState<'ALL' | 'SYSTEM' | 'GALAXY' | 'NEO' | 'TECH'>('ALL');
     const { setView, setSelectedBody, setIsFocusMode } = useDashboard();
     const router = useRouter();
-    const { neos, dsn, isLoading } = useNasaTelemetry(30000);
+    const { neos } = useNasaTelemetry(30000);
 
     const handleReadIntel = (docId: string) => {
         const targetMap: Record<string, { view: 'SOLAR' | 'SKY', bodyId: string }> = {

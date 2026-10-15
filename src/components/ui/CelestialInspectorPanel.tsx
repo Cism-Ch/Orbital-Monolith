@@ -338,7 +338,10 @@ export const CelestialInspectorPanel: React.FC = () => {
                                     )}
                                     {displayedBody.funFact && (
                                         <div className="bg-[var(--accent-primary)]/5 border border-[var(--accent-primary)]/15 rounded-xl p-3 mt-2">
-                                            <span className="text-[var(--accent-primary)] text-[7px] font-black uppercase tracking-widest block mb-1">⚡ Fun Fact</span>
+                                            <span className="text-[var(--accent-primary)] text-[7px] font-black uppercase tracking-widest flex items-center gap-1.5 mb-1">
+                                                <Zap size={9} />
+                                                Fun Fact
+                                            </span>
                                             <p className="text-white/70 text-[9px] leading-relaxed">{displayedBody.funFact}</p>
                                         </div>
                                     )}

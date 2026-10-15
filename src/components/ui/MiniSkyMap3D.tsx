@@ -15,7 +15,7 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
-import { RotateCcw, ArrowRight, Eye, Radio } from 'lucide-react';
+import { RotateCcw, ArrowRight, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { STARS } from '@/constants';
 import type { CelestialBody } from '@/types';

@@ -38,6 +38,6 @@ export default [
         },
     },
     {
-        ignores: [".next/*", "node_modules/*", "build_output.txt"],
+        ignores: [".next/*", "node_modules/*", "build_output.txt", ".agents/*", ".agents/**"],
     }
 ];

@@ -411,10 +411,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                             </div>
                             <button
                                 onClick={() => setShowNotifications(false)}
-                                className="w-6 h-6 rounded-full bg-white/5 hover:bg-white/15 text-white/50 hover:text-white flex items-center justify-center text-[10px] transition-colors cursor-pointer"
+                                className="w-6 h-6 rounded-full bg-white/5 hover:bg-white/15 text-white/50 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
                                 title="Close Alerts"
                             >
-                                ✕
+                                <X size={12} />
                             </button>
                         </div>
 

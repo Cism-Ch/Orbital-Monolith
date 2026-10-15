@@ -14,19 +14,18 @@
  * - Barre de contrôle des calques flottante ergonomique et tactile (Mobile-first, min-h 44px)
  */
 
-import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three-stdlib';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Waypoints, Sparkles, Info, X, Orbit, Radio,
-    Compass, Eye, Globe, Satellite, Sparkle
+    Globe, Sparkle
 } from 'lucide-react';
 
 import { useUniverseEngine } from '@/lib/UniverseEngineContext';
 import { useDashboard } from '@/lib/DashboardContext';
 import { useScenePointer } from '@/hooks/useScenePointer';
-import { useNasaTelemetry } from '@/hooks/useNasaTelemetry';
 import { STARS, CONSTELLATIONS } from '@/constants';
 import { CelestialBody, CelestialType } from '@/types';
 
@@ -110,7 +109,7 @@ export const SkyMapView: React.FC<SkyMapViewProps> = ({ onSelect, onHover }) => 
     const {
         orientation, setOrientation,
         zoom, setZoom,
-        showGrid, setShowGrid,
+        showGrid,
         showMilkyWay, setShowMilkyWay,
         showConstellations, setShowConstellations,
         showEcliptic, setShowEcliptic,
@@ -120,9 +119,6 @@ export const SkyMapView: React.FC<SkyMapViewProps> = ({ onSelect, onHover }) => 
         perspectiveMode,
         isMeasuringMode, distancePoints, addDistancePoint,
     } = useDashboard();
-
-    // Télémétrie live NASA DSN
-    const { dsn } = useNasaTelemetry();
 
     // ── État UI overlay ────────────────────────────────────────────────────────
     const [hoveredConst, setHoveredConst] = useState<typeof CONSTELLATIONS[0] | null>(null);

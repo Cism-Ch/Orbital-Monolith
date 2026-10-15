@@ -51,7 +51,7 @@ export const SceneControlPanel: React.FC = () => {
                 <button
                     onClick={handleResetView}
                     title="Reset Camera View"
-                    className="w-9 h-9 rounded-xl flex items-center justify-center bg-white/5 text-white/70 hover:text-white hover:bg-white/10 active:scale-95 transition-all cursor-pointer touch-target"
+                    className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-xl flex items-center justify-center bg-white/5 text-white/70 hover:text-white hover:bg-white/10 active:scale-95 transition-all cursor-pointer touch-target"
                     aria-label="Reset View"
                 >
                     <RotateCcw size={14} />
@@ -61,7 +61,7 @@ export const SceneControlPanel: React.FC = () => {
                 <button
                     onClick={() => setPerspectiveMode(perspectiveMode === 'heliocentric' ? 'free' : 'heliocentric')}
                     title="Toggle Free Orbit Camera"
-                    className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all cursor-pointer active:scale-95 touch-target ${
+                    className={`w-11 h-11 min-h-[44px] min-w-[44px] rounded-xl flex items-center justify-center transition-all cursor-pointer active:scale-95 touch-target ${
                         perspectiveMode === 'free'
                             ? 'bg-[var(--accent-primary)] text-black shadow-[0_0_12px_rgba(77,238,234,0.3)]'
                             : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white'
@@ -75,7 +75,7 @@ export const SceneControlPanel: React.FC = () => {
                 <button
                     onClick={() => setShowGrid(!showGrid)}
                     title="Toggle Coordinate Grid"
-                    className={`w-9 h-9 rounded-xl flex items-center justify-center text-[10px] font-black transition-all cursor-pointer active:scale-95 touch-target ${
+                    className={`w-11 h-11 min-h-[44px] min-w-[44px] rounded-xl flex items-center justify-center text-[10px] font-black transition-all cursor-pointer active:scale-95 touch-target ${
                         showGrid
                             ? 'bg-[var(--accent-primary)] text-black shadow-[0_0_12px_rgba(77,238,234,0.3)]'
                             : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white'
@@ -89,7 +89,7 @@ export const SceneControlPanel: React.FC = () => {
                 <button
                     onClick={() => setShowMilkyWay(!showMilkyWay)}
                     title="Toggle Milky Way"
-                    className={`w-9 h-9 rounded-xl flex items-center justify-center text-[10px] font-black transition-all cursor-pointer active:scale-95 touch-target ${
+                    className={`w-11 h-11 min-h-[44px] min-w-[44px] rounded-xl flex items-center justify-center text-[10px] font-black transition-all cursor-pointer active:scale-95 touch-target ${
                         showMilkyWay
                             ? 'bg-[var(--accent-primary)] text-black shadow-[0_0_12px_rgba(77,238,234,0.3)]'
                             : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white'
@@ -104,7 +104,7 @@ export const SceneControlPanel: React.FC = () => {
                     <button
                         onClick={() => setShowConstellations(!showConstellations)}
                         title="Toggle Constellations Lines"
-                        className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all cursor-pointer active:scale-95 touch-target ${
+                        className={`w-11 h-11 min-h-[44px] min-w-[44px] rounded-xl flex items-center justify-center transition-all cursor-pointer active:scale-95 touch-target ${
                             showConstellations
                                 ? 'bg-[var(--accent-primary)] text-black shadow-[0_0_12px_rgba(77,238,234,0.3)]'
                                 : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white'

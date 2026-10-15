@@ -543,8 +543,22 @@ export default function SettingsPage() {
                                     : 'bg-white/5 border border-white/10 text-white hover:bg-[var(--accent-primary)] hover:text-black shadow-[0_0_15px_rgba(77,238,234,0.15)]'
                             }`}
                         >
-                            <RefreshCcw size={14} className={isResyncing ? "animate-spin" : ""} /> 
-                            {isResyncing ? "Calibrating Sensors..." : resyncSuccess ? `✓ Synced (${totalCatalogNodes} Nodes)` : "Re-Sync Systems"}
+                            {isResyncing ? (
+                                <>
+                                    <RefreshCcw size={14} className="animate-spin" />
+                                    <span>Calibrating Sensors...</span>
+                                </>
+                            ) : resyncSuccess ? (
+                                <>
+                                    <Check size={14} />
+                                    <span>Synced ({totalCatalogNodes} Nodes)</span>
+                                </>
+                            ) : (
+                                <>
+                                    <RefreshCcw size={14} />
+                                    <span>Re-Sync Systems</span>
+                                </>
+                            )}
                         </button>
                     </div>
 
