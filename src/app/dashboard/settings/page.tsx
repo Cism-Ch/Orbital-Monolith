@@ -183,10 +183,10 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Actions Header (Save & Reset) responsive */}
-                <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-2 sm:gap-3 w-full sm:w-auto">
                     <button
                         onClick={handleResetDefaults}
-                        className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2.5 rounded-xl sm:rounded-2xl text-[8px] sm:text-[9px] font-mono font-bold uppercase tracking-wider bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
+                        className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2.5 min-h-[44px] rounded-xl sm:rounded-2xl text-[8px] sm:text-[9px] font-mono font-bold uppercase tracking-wider bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all cursor-pointer active:scale-98"
                         title="Reset all settings to default values"
                     >
                         <RotateCcw size={12} />
@@ -194,7 +194,7 @@ export default function SettingsPage() {
                     </button>
                     <button
                         onClick={handleSaveSettings}
-                        className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 sm:gap-2.5 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[8px] sm:text-[9px] font-mono font-black uppercase tracking-wider sm:tracking-widest transition-all cursor-pointer border ${
+                        className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 sm:gap-2.5 px-4 sm:px-6 py-2.5 min-h-[44px] rounded-xl sm:rounded-2xl text-[8px] sm:text-[9px] font-mono font-black uppercase tracking-wider sm:tracking-widest transition-all cursor-pointer border active:scale-98 ${
                             saveSavedNotice
                                 ? 'bg-emerald-500 text-black border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.3)]'
                                 : 'bg-[var(--accent-primary)]/20 border-[var(--accent-primary)]/40 text-[var(--accent-primary)] hover:bg-[var(--accent-primary)] hover:text-black shadow-[0_0_20px_rgba(77,238,234,0.15)]'
@@ -215,7 +215,7 @@ export default function SettingsPage() {
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id as any)}
-                            className={`flex items-center justify-center gap-2 sm:gap-2.5 px-3 sm:px-5 py-2.5 sm:py-3 rounded-xl text-[8.5px] sm:text-[10px] font-mono font-bold uppercase tracking-wider transition-all cursor-pointer text-center w-full truncate ${
+                            className={`flex items-center justify-center gap-1.5 sm:gap-2.5 px-2.5 sm:px-5 py-2.5 sm:py-3 min-h-[44px] rounded-xl text-[8px] xs:text-[8.5px] sm:text-[10px] font-mono font-bold uppercase tracking-wider transition-all cursor-pointer text-center w-full truncate ${
                                 isActive
                                     ? 'bg-[var(--accent-primary)]/20 text-[var(--accent-primary)] border border-[var(--accent-primary)]/40 shadow-[0_0_20px_rgba(77,238,234,0.25)]'
                                     : 'bg-white/5 border border-white/8 text-white/60 hover:text-white hover:bg-white/10'
@@ -549,41 +549,41 @@ export default function SettingsPage() {
                     </div>
 
                     {/* Grille des 4 Métriques Réelles Système */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4">
                         {/* FPS Réel */}
-                        <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/8 space-y-1">
-                            <div className="flex items-center gap-2 text-[#6c6c7a]">
+                        <div className="p-3 sm:p-3.5 rounded-2xl bg-white/[0.03] border border-white/8 space-y-1">
+                            <div className="flex items-center gap-1.5 sm:gap-2 text-[#6c6c7a]">
                                 <Zap size={12} className="text-amber-400" />
-                                <span className="text-[7.5px] sm:text-[8px] font-mono font-bold uppercase">Live FPS</span>
+                                <span className="text-[7.5px] sm:text-[8px] font-mono font-bold uppercase truncate">Live FPS</span>
                             </div>
-                            <p className="text-base sm:text-lg font-mono font-black text-white">{fps} <span className="text-[9px] text-emerald-400">FPS</span></p>
+                            <p className="text-sm sm:text-lg font-mono font-black text-white">{fps} <span className="text-[8px] sm:text-[9px] text-emerald-400">FPS</span></p>
                         </div>
 
                         {/* Heap Mémoire Réel */}
-                        <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/8 space-y-1">
-                            <div className="flex items-center gap-2 text-[#6c6c7a]">
+                        <div className="p-3 sm:p-3.5 rounded-2xl bg-white/[0.03] border border-white/8 space-y-1 min-w-0">
+                            <div className="flex items-center gap-1.5 sm:gap-2 text-[#6c6c7a]">
                                 <HardDrive size={12} className="text-[var(--accent-primary)]" />
-                                <span className="text-[7.5px] sm:text-[8px] font-mono font-bold uppercase">JS Heap Memory</span>
+                                <span className="text-[7.5px] sm:text-[8px] font-mono font-bold uppercase truncate">JS Memory</span>
                             </div>
-                            <p className="text-xs sm:text-sm font-mono font-black text-white truncate">{memoryMb}</p>
+                            <p className="text-[10px] xs:text-xs sm:text-sm font-mono font-black text-white truncate">{memoryMb}</p>
                         </div>
 
                         {/* Nœuds Catalogue */}
-                        <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/8 space-y-1">
-                            <div className="flex items-center gap-2 text-[#6c6c7a]">
+                        <div className="p-3 sm:p-3.5 rounded-2xl bg-white/[0.03] border border-white/8 space-y-1">
+                            <div className="flex items-center gap-1.5 sm:gap-2 text-[#6c6c7a]">
                                 <Activity size={12} className="text-cyan-400" />
-                                <span className="text-[7.5px] sm:text-[8px] font-mono font-bold uppercase">Catalog Nodes</span>
+                                <span className="text-[7.5px] sm:text-[8px] font-mono font-bold uppercase truncate">Catalog Nodes</span>
                             </div>
-                            <p className="text-base sm:text-lg font-mono font-black text-white">{totalCatalogNodes} <span className="text-[9px] text-[#6c6c7a]">Objects</span></p>
+                            <p className="text-sm sm:text-lg font-mono font-black text-white">{totalCatalogNodes} <span className="text-[8px] sm:text-[9px] text-[#6c6c7a]">Nodes</span></p>
                         </div>
 
                         {/* Résolution Écran & DPR */}
-                        <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/8 space-y-1">
-                            <div className="flex items-center gap-2 text-[#6c6c7a]">
+                        <div className="p-3 sm:p-3.5 rounded-2xl bg-white/[0.03] border border-white/8 space-y-1 min-w-0">
+                            <div className="flex items-center gap-1.5 sm:gap-2 text-[#6c6c7a]">
                                 <Monitor size={12} className="text-purple-400" />
-                                <span className="text-[7.5px] sm:text-[8px] font-mono font-bold uppercase">Viewport DPR</span>
+                                <span className="text-[7.5px] sm:text-[8px] font-mono font-bold uppercase truncate">Viewport DPR</span>
                             </div>
-                            <p className="text-[10px] sm:text-xs font-mono font-black text-white truncate">{screenRes}</p>
+                            <p className="text-[9px] xs:text-[10px] sm:text-xs font-mono font-black text-white truncate">{screenRes}</p>
                         </div>
                     </div>
 

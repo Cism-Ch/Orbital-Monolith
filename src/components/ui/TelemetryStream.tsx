@@ -13,7 +13,7 @@ export const TelemetryStream: React.FC<TelemetryStreamProps> = ({ body }) => {
     const logs = useTelemetry(body);
 
     return (
-        <div className="flex flex-col gap-3 font-mono h-full overflow-hidden">
+        <div className="relative flex flex-col gap-2 sm:gap-3 font-mono h-full overflow-hidden">
             <AnimatePresence mode="popLayout" initial={false}>
                 {logs.slice(-12).map((log) => (
                     <motion.div
@@ -27,18 +27,18 @@ export const TelemetryStream: React.FC<TelemetryStreamProps> = ({ body }) => {
                             damping: 30,
                             opacity: { duration: 0.2 }
                         }}
-                        className="flex items-center gap-4 bg-white/[0.03] border border-white/5 px-5 py-3 rounded-full group hover:bg-white/[0.08] hover:border-[var(--accent-primary)]/20 transition-all"
+                        className="flex items-center gap-2.5 sm:gap-4 bg-white/[0.03] border border-white/5 px-3 sm:px-5 py-2 sm:py-3 rounded-xl sm:rounded-full group hover:bg-white/[0.08] hover:border-[var(--accent-primary)]/20 transition-all min-w-0"
                     >
-                        <span className="text-[9px] font-black text-[#6c6c7a] shrink-0 tracking-tighter">
+                        <span className="text-[8px] sm:text-[9px] font-black text-[#6c6c7a] shrink-0 tracking-tighter font-mono">
                             [{log.timestamp}]
                         </span>
-                        <div className="flex-1 flex items-center justify-between overflow-hidden">
-                            <span className="text-[10px] font-black text-white/80 truncate uppercase tracking-tight group-hover:text-white">
+                        <div className="flex-1 flex items-center justify-between gap-2 overflow-hidden min-w-0">
+                            <span className="text-[9px] sm:text-[10px] font-black text-white/80 truncate uppercase tracking-tight group-hover:text-white">
                                 {log.event}
                             </span>
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
                                 <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)] animate-pulse" />
-                                <span className="text-[9px] font-bold text-[var(--accent-primary)] shrink-0 opacity-80">
+                                <span className="text-[8px] sm:text-[9px] font-bold text-[var(--accent-primary)] opacity-80">
                                     {log.value}
                                 </span>
                             </div>
@@ -48,7 +48,7 @@ export const TelemetryStream: React.FC<TelemetryStreamProps> = ({ body }) => {
             </AnimatePresence>
 
             {/* Ambient Bottom Fade */}
-            <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black/80 to-transparent pointer-events-none z-10" />
+            <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 bg-gradient-to-t from-black/80 to-transparent pointer-events-none z-10" />
         </div>
     );
 };

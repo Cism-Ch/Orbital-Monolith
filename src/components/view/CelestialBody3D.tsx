@@ -1,5 +1,15 @@
 "use client";
 
+/**
+ * @file components/view/CelestialBody3D.tsx
+ * @description Hologramme 3D Three.js pour visualisation détaillée d'un astre — Orbital Monolith v3.6.
+ *
+ * Optimisations :
+ * - Performance : RAF loop fluide sans démontage intempestif du renderer lors du survol (utilisation de refs).
+ * - Tactile : Support unifié des PointerEvents avec touch-action: none.
+ * - Responsive : Taille adaptative fluide avec contrainte max-width pour mobile.
+ */
+
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { CelestialBody } from '@/types';
@@ -11,9 +21,17 @@ interface CelestialBody3DProps {
     onClick?: () => void;
 }
 
-export const CelestialBody3D: React.FC<CelestialBody3DProps> = ({ body, size = 300, showTitle = true, onClick }) => {
+export const CelestialBody3D: React.FC<CelestialBody3DProps> = ({
+    body,
+    size = 280,
+    showTitle = true,
+    onClick
+}) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [isHovered, setIsHovered] = useState(false);
+    const isHoveredRef = useRef(false);
+    const onClickRef = useRef(onClick);
+    onClickRef.current = onClick;
 
     useEffect(() => {
         const container = containerRef.current;
@@ -33,9 +51,12 @@ export const CelestialBody3D: React.FC<CelestialBody3DProps> = ({ body, size = 3
         camera.position.z = 3.5;
 
         // Renderer
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
         renderer.setSize(width, height);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.domElement.style.touchAction = 'none';
+        renderer.domElement.style.maxWidth = '100%';
+        renderer.domElement.style.height = 'auto';
         container.appendChild(renderer.domElement);
 
         // --- Main Sphere geometry ---
@@ -105,34 +126,51 @@ export const CelestialBody3D: React.FC<CelestialBody3DProps> = ({ body, size = 3
         secondaryLight.position.set(-5, -2, 2);
         scene.add(secondaryLight);
 
-        // Interaction
+        // Interaction unifiée (Mouse & Touch via PointerEvents)
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
 
-        const onMouseMove = (event: MouseEvent) => {
+        const onPointerMove = (event: PointerEvent) => {
             const rect = renderer.domElement.getBoundingClientRect();
-            mouse.x = ((event.clientX - rect.left) / width) * 2 - 1;
-            mouse.y = -((event.clientY - rect.top) / height) * 2 + 1;
+            mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
             raycaster.setFromCamera(mouse, camera);
             const intersects = raycaster.intersectObject(sphere);
             const hovering = intersects.length > 0;
-            setIsHovered(hovering);
+            if (isHoveredRef.current !== hovering) {
+                isHoveredRef.current = hovering;
+                setIsHovered(hovering);
+            }
             renderer.domElement.style.cursor = hovering ? 'pointer' : 'default';
         };
 
-        const onLocalClick = () => {
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObject(sphere);
-            if (intersects.length > 0 && onClick) {
-                onClick();
+        const onPointerLeave = () => {
+            if (isHoveredRef.current) {
+                isHoveredRef.current = false;
+                setIsHovered(false);
+                renderer.domElement.style.cursor = 'default';
             }
         };
 
-        renderer.domElement.addEventListener('mousemove', onMouseMove);
-        renderer.domElement.addEventListener('click', onLocalClick);
+        const onPointerDown = (event: PointerEvent) => {
+            const rect = renderer.domElement.getBoundingClientRect();
+            mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
-        // Animation
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObject(sphere);
+            if (intersects.length > 0 && onClickRef.current) {
+                onClickRef.current();
+            }
+        };
+
+        const dom = renderer.domElement;
+        dom.addEventListener('pointermove', onPointerMove);
+        dom.addEventListener('pointerleave', onPointerLeave);
+        dom.addEventListener('pointerdown', onPointerDown);
+
+        // Boucle d'animation (exécutée en continu sans remontage)
         let animationFrameId: number;
         const animate = () => {
             animationFrameId = requestAnimationFrame(animate);
@@ -142,30 +180,32 @@ export const CelestialBody3D: React.FC<CelestialBody3DProps> = ({ body, size = 3
             const elapsed = Date.now() * 0.001;
             glowMaterial.uniforms.time.value = elapsed;
 
+            const hovered = isHoveredRef.current;
             const pulseBase = body.type === 'STAR' ? 1.02 : 0.98;
-            const pulseAmp = isHovered ? 0.04 : 0.015;
+            const pulseAmp = hovered ? 0.04 : 0.015;
             const pulse = pulseBase + Math.sin(elapsed * 0.8) * pulseAmp;
 
             glowMesh.scale.set(pulse, pulse, pulse);
 
             glowMaterial.uniforms.hoverIntensity.value = THREE.MathUtils.lerp(
                 glowMaterial.uniforms.hoverIntensity.value,
-                isHovered ? 1.0 : 0.0,
-                0.03
+                hovered ? 1.0 : 0.0,
+                0.05
             );
 
-            const targetEmissive = (body.type === 'STAR' ? 0.7 : 0.15) + (isHovered ? 0.3 : 0);
-            material.emissiveIntensity = THREE.MathUtils.lerp(material.emissiveIntensity, targetEmissive, 0.03);
+            const targetEmissive = (body.type === 'STAR' ? 0.7 : 0.15) + (hovered ? 0.3 : 0);
+            material.emissiveIntensity = THREE.MathUtils.lerp(material.emissiveIntensity, targetEmissive, 0.05);
 
             renderer.render(scene, camera);
         };
         animate();
 
-        // Cleanup complet
+        // Cleanup complet et propre
         return () => {
             cancelAnimationFrame(animationFrameId);
-            renderer.domElement.removeEventListener('mousemove', onMouseMove);
-            renderer.domElement.removeEventListener('click', onLocalClick);
+            dom.removeEventListener('pointermove', onPointerMove);
+            dom.removeEventListener('pointerleave', onPointerLeave);
+            dom.removeEventListener('pointerdown', onPointerDown);
             renderer.dispose();
             geometry.dispose();
             material.dispose();
@@ -175,32 +215,35 @@ export const CelestialBody3D: React.FC<CelestialBody3DProps> = ({ body, size = 3
                 container.innerHTML = '';
             }
         };
-    }, [body, size, isHovered, onClick]);
+    }, [body, size]);
 
     return (
         <div
-            className={`flex flex-col items-center justify-center relative transition-all duration-500 ${isHovered ? 'scale-105' : 'scale-100'}`}
+            className={`flex flex-col items-center justify-center relative transition-transform duration-300 max-w-full select-none ${isHovered ? 'scale-105' : 'scale-100'}`}
             style={{
                 background: `radial-gradient(circle at center, ${body.colors[0]}${isHovered ? '35' : '15'} 0%, transparent 70%)`
             }}
         >
             <div
                 ref={containerRef}
-                style={{ width: `${size}px`, height: `${size}px` }}
-                className="relative z-10 flex items-center justify-center overflow-hidden"
+                style={{ width: `${size}px`, height: `${size}px`, maxWidth: '100%' }}
+                className="relative z-10 flex items-center justify-center overflow-hidden aspect-square"
             >
                 <div
-                    className={`absolute inset-0 rounded-full blur-[80px] transition-opacity duration-1000 pointer-events-none ${isHovered ? 'opacity-30' : 'opacity-[0.12]'}`}
+                    className={`absolute inset-0 rounded-full blur-[60px] sm:blur-[80px] transition-opacity duration-700 pointer-events-none ${isHovered ? 'opacity-30' : 'opacity-[0.12]'}`}
                     style={{ backgroundColor: body.colors[0] }}
                 />
             </div>
 
             {showTitle && (
-                <div className="mt-3 text-center z-10">
-                    <h2 className={`text-xl font-black uppercase tracking-tighter mb-0.5 transition-all duration-500 ${isHovered ? 'drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]' : ''}`} style={{ color: body.colors[0] }}>
+                <div className="mt-2 sm:mt-3 text-center z-10 px-2 max-w-full">
+                    <h2
+                        className={`text-lg sm:text-xl font-black uppercase tracking-tight mb-0.5 transition-all duration-300 truncate ${isHovered ? 'drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]' : ''}`}
+                        style={{ color: body.colors[0] }}
+                    >
                         {body.name}
                     </h2>
-                    <div className="font-mono text-[7px] text-white/30 uppercase tracking-[0.4em]">
+                    <div className="font-mono text-[7px] sm:text-[8px] text-white/40 uppercase tracking-[0.25em] sm:tracking-[0.4em] truncate">
                         IDENT: {body.scientificName} // {body.type}
                     </div>
                 </div>

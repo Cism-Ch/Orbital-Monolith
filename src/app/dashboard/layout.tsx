@@ -203,7 +203,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsMobileDrawerOpen(!isMobileDrawerOpen)}
-                className="md:hidden fixed top-3 left-3 z-[110] w-11 h-11 rounded-2xl bg-black/90 border border-white/20 backdrop-blur-2xl flex items-center justify-center text-[var(--accent-primary)] shadow-2xl pointer-events-auto cursor-pointer"
+                style={{ top: 'max(0.75rem, env(safe-area-inset-top, 0px))' }}
+                className="md:hidden fixed left-3 z-[110] w-11 h-11 rounded-2xl bg-black/90 border border-white/20 backdrop-blur-2xl flex items-center justify-center text-[var(--accent-primary)] shadow-2xl pointer-events-auto cursor-pointer"
                 aria-label="Toggle Mobile Navigation"
             >
                 {isMobileDrawerOpen ? <X size={20} /> : <Menu size={20} />}
@@ -412,7 +413,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
             {/* ═══════════════════════════════════════════════════════════════
                 HEADER — Barre de recherche et status (z-50)
             ═══════════════════════════════════════════════════════════════ */}
-            <div className="fixed top-0 left-0 right-0 z-50 p-3 sm:p-4 pl-16 md:pl-6 flex items-center gap-3 sm:gap-4 pointer-events-none">
+            <div 
+                style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top, 0px))' }}
+                className="fixed top-0 left-0 right-0 z-50 p-3 sm:p-4 pl-16 md:pl-6 flex items-center gap-3 sm:gap-4 pointer-events-none"
+            >
                 {/* Barre de recherche */}
                 <div className="relative pointer-events-auto flex-1 max-w-[220px] xs:max-w-[280px] sm:w-80 sm:flex-none">
                     <div className="flex items-center gap-2.5 bg-black/70 backdrop-blur-2xl border border-white/15 rounded-2xl px-3 sm:px-4 py-2 sm:py-2.5 w-full">
@@ -438,7 +442,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                                 initial={{ opacity: 0, y: -8 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -8 }}
-                                className="absolute top-full mt-2 w-full monolith-panel overflow-hidden z-60"
+                                className="absolute top-full mt-2 w-full max-h-[50vh] overflow-y-auto monolith-panel z-60 shadow-2xl"
                             >
                                 {searchResults.slice(0, 6).map(body => (
                                     <button
@@ -514,7 +518,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 Toggle SOLAR/SKY, mode mesure, et actions rapides.
             ═══════════════════════════════════════════════════════════════ */}
             <div
-                className="fixed bottom-4 left-4 md:bottom-8 md:left-6 z-40 flex flex-col gap-2 items-start pointer-events-auto"
+                className="fixed bottom-[108px] left-3.5 md:bottom-8 md:left-6 z-30 md:z-40 flex flex-col gap-2 items-start pointer-events-auto"
                 onMouseEnter={() => setToolboxOpen(true)}
                 onMouseLeave={() => setToolboxOpen(false)}
             >

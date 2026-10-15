@@ -23,10 +23,11 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three-stdlib';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Waypoints, Sparkles, Info } from 'lucide-react';
+import { Waypoints, Sparkles, Info, X } from 'lucide-react';
 
 import { useUniverseEngine } from '@/lib/UniverseEngineContext';
 import { useDashboard } from '@/lib/DashboardContext';
+import { useScenePointer } from '@/hooks/useScenePointer';
 import { STARS, CONSTELLATIONS } from '@/constants';
 import type { CelestialBody } from '@/types';
 
@@ -50,7 +51,7 @@ export const SkyMapView: React.FC<SkyMapViewProps> = ({ onSelect, onHover }) => 
 
     const {
         orientation, setOrientation,
-        zoom,
+        zoom, setZoom,
         showGrid,
         showMilkyWay,
         showConstellations, setShowConstellations,
@@ -354,6 +355,15 @@ export const SkyMapView: React.FC<SkyMapViewProps> = ({ onSelect, onHover }) => 
         };
     }, [isReady, scene, camera, toSphere]);
 
+    // ── Références d'état synchronisées pour la boucle RAF ────────────────────
+    const orientationRef = useRef(orientation);
+    orientationRef.current = orientation;
+    const zoomRef = useRef(zoom);
+    zoomRef.current = zoom;
+    const hoveredStarIdRef = useRef<string | null>(null);
+    const hoveredConstIdRef = useRef<string | null>(null);
+    const raycasterRef = useRef<THREE.Raycaster>(new THREE.Raycaster());
+
     // ── OrbitControls (mode libre) ────────────────────────────────────────────
     useEffect(() => {
         const cam = camera.current;
@@ -368,6 +378,10 @@ export const SkyMapView: React.FC<SkyMapViewProps> = ({ onSelect, onHover }) => 
         controls.dampingFactor = 0.05;
         controls.minDistance = 200;
         controls.maxDistance = 5000;
+        controls.touches = {
+            ONE: THREE.TOUCH.ROTATE,
+            TWO: THREE.TOUCH.DOLLY_PAN,
+        };
         controlsRef.current = controls;
         return () => {
             controls.dispose();
@@ -375,29 +389,131 @@ export const SkyMapView: React.FC<SkyMapViewProps> = ({ onSelect, onHover }) => 
         };
     }, [perspectiveMode, camera, renderer]);
 
-    // ── Boucle d'animation ────────────────────────────────────────────────────
+    // ── Callbacks gestuels unifiés (useScenePointer) ───────────────────────────
+    const handleRotate = useCallback((deltaRot: number, deltaInc: number) => {
+        if (perspectiveMode === 'free') return;
+        setOrientation({
+            rotation: ((((orientationRef.current.rotation + deltaRot) + 180) % 360 + 360) % 360) - 180,
+            inclination: Math.max(0, Math.min(90, orientationRef.current.inclination + deltaInc)),
+        });
+    }, [perspectiveMode, setOrientation]);
+
+    const handleZoom = useCallback((zoomDelta: number) => {
+        if (perspectiveMode === 'free') return;
+        setZoom(Math.max(0.05, Math.min(5, zoomRef.current + zoomDelta)));
+    }, [perspectiveMode, setZoom]);
+
+    const handleTap = useCallback((_e: PointerEvent, ndc: { x: number; y: number }) => {
+        const cam = camera.current;
+        if (!cam) return;
+
+        raycasterRef.current.setFromCamera(new THREE.Vector2(ndc.x, ndc.y), cam);
+
+        // 1. Test des étoiles
+        const starGroups = starEntriesRef.current.map(e => e.group);
+        const hits = raycasterRef.current.intersectObjects(starGroups, true);
+        const starHit = hits.find(h => h.object.userData.body);
+
+        if (starHit) {
+            const body = starHit.object.userData.body as CelestialBody;
+            if (isMeasuringMode) addDistancePoint(body);
+            else onSelect(body);
+            return;
+        }
+
+        // 2. Test des constellations si aucune étoile touchée
+        if (showConstellations && constGroupRef.current) {
+            raycasterRef.current.params.Line = { threshold: 30 };
+            const constHits = raycasterRef.current.intersectObjects(constGroupRef.current.children, true);
+            const constHit = constHits.find(h => h.object.userData.constellation);
+            if (constHit) {
+                setHoveredConst(constHit.object.userData.constellation);
+                return;
+            }
+        }
+
+        // Tap dans le vide : fermer la fiche de constellation
+        setHoveredConst(null);
+    }, [camera, isMeasuringMode, addDistancePoint, onSelect, showConstellations]);
+
+    const handleHover = useCallback((ndc: { x: number; y: number } | null) => {
+        const rend = renderer.current;
+        const cam = camera.current;
+        if (!rend || !cam || !ndc) {
+            if (hoveredStarIdRef.current !== null) {
+                hoveredStarIdRef.current = null;
+                onHover(null);
+            }
+            if (hoveredConstIdRef.current !== null) {
+                hoveredConstIdRef.current = null;
+                setHoveredConst(null);
+            }
+            if (rend) rend.domElement.style.cursor = 'default';
+            return;
+        }
+
+        raycasterRef.current.setFromCamera(new THREE.Vector2(ndc.x, ndc.y), cam);
+
+        // Test étoiles
+        const starGroups = starEntriesRef.current.map(e => e.group);
+        const hits = raycasterRef.current.intersectObjects(starGroups, true);
+        const starHit = hits.find(h => h.object.userData.body);
+        const starBody = starHit ? (starHit.object.userData.body as CelestialBody) : null;
+
+        if (hoveredStarIdRef.current !== (starBody?.id ?? null)) {
+            hoveredStarIdRef.current = starBody?.id ?? null;
+            onHover(starBody);
+        }
+
+        // Test constellations
+        if (!starBody && showConstellations && constGroupRef.current) {
+            raycasterRef.current.params.Line = { threshold: 25 };
+            const constHits = raycasterRef.current.intersectObjects(constGroupRef.current.children, true);
+            const constHit = constHits.find(h => h.object.userData.constellation);
+            const constData = constHit ? constHit.object.userData.constellation : null;
+            if (hoveredConstIdRef.current !== (constData?.id ?? null)) {
+                hoveredConstIdRef.current = constData?.id ?? null;
+                setHoveredConst(constData ?? null);
+            }
+        } else if (hoveredConstIdRef.current) {
+            hoveredConstIdRef.current = null;
+            setHoveredConst(null);
+        }
+
+        if (rend) {
+            rend.domElement.style.cursor = (starBody || hoveredConstIdRef.current) ? 'pointer' : 'default';
+        }
+    }, [camera, renderer, onHover, showConstellations]);
+
+    // Activation du gestionnaire unifié
+    useScenePointer({
+        element: renderer.current?.domElement ?? null,
+        enabled: isReady,
+        onRotate: handleRotate,
+        onZoom: handleZoom,
+        onTap: handleTap,
+        onHover: handleHover,
+    });
+
+    // ── Boucle d'animation (continue) ─────────────────────────────────────────
     useEffect(() => {
         if (!isReady) return;
         const entries = starEntriesRef.current;
         const constLines = constLinesRef.current;
-        let hoveredStarId: string | null = null;
-        let hoveredConstId: string | null = null;
-        const raycaster = new THREE.Raycaster();
-        raycaster.params.Line = { threshold: 25 };
-        const mouse = new THREE.Vector2();
 
         const cleanupAnim = registerAnimation((time, scene, cam) => {
             // Contrôle caméra
             if (perspectiveMode === 'heliocentric') {
                 scene.rotation.x = THREE.MathUtils.lerp(
-                    scene.rotation.x, THREE.MathUtils.degToRad(orientation.inclination), 0.05
+                    scene.rotation.x, THREE.MathUtils.degToRad(orientationRef.current.inclination), 0.08
                 );
                 scene.rotation.y = THREE.MathUtils.lerp(
-                    scene.rotation.y, THREE.MathUtils.degToRad(orientation.rotation), 0.05
+                    scene.rotation.y, THREE.MathUtils.degToRad(orientationRef.current.rotation), 0.08
                 );
-                const effectiveZoom = zoom <= 0 ? (0.3 + zoom * 0.7) : zoom;
+                const curZoom = zoomRef.current;
+                const effectiveZoom = curZoom <= 0 ? (0.3 + curZoom * 0.7) : curZoom;
                 const targetZ = 1500 / Math.max(0.05, effectiveZoom);
-                cam.position.z = THREE.MathUtils.lerp(cam.position.z, targetZ, 0.05);
+                cam.position.z = THREE.MathUtils.lerp(cam.position.z, targetZ, 0.08);
             } else {
                 controlsRef.current?.update();
                 scene.rotation.x = THREE.MathUtils.lerp(scene.rotation.x, 0, 0.05);
@@ -418,7 +534,7 @@ export const SkyMapView: React.FC<SkyMapViewProps> = ({ onSelect, onHover }) => 
 
             // Animation étoiles (hover)
             entries.forEach(e => {
-                const isHov = hoveredStarId === e.body.id;
+                const isHov = hoveredStarIdRef.current === e.body.id;
                 const targetScale = isHov ? 2.5 : 1.0;
                 e.group.scale.setScalar(THREE.MathUtils.lerp(e.group.scale.x, targetScale, 0.12));
                 const glowMat = e.glow.material as THREE.MeshBasicMaterial;
@@ -429,7 +545,7 @@ export const SkyMapView: React.FC<SkyMapViewProps> = ({ onSelect, onHover }) => 
 
             // Animation lignes constellations (hover)
             constLines.forEach(l => {
-                const isHov = hoveredConstId === l.id;
+                const isHov = hoveredConstIdRef.current === l.id;
                 const mat = l.mesh.material as THREE.LineBasicMaterial;
                 mat.opacity = THREE.MathUtils.lerp(mat.opacity, isHov ? 0.9 : 0.28, 0.08);
             });
@@ -457,146 +573,37 @@ export const SkyMapView: React.FC<SkyMapViewProps> = ({ onSelect, onHover }) => 
             void time;
         });
 
-        // ── Interactions souris ─────────────────────────────────────────────
-        const handleMove = (e: MouseEvent) => {
-            const rend = renderer.current;
-            const cam = camera.current;
-            if (!rend || !cam) return;
-
-            // Ne pas intercepter si la souris survole une UI interactif
-            const targetEl = e.target as HTMLElement | null;
-            if (targetEl?.closest('button, input, a, aside, nav, .pointer-events-auto')) {
-                if (hoveredStarId !== null) {
-                    hoveredStarId = null;
-                    onHover(null);
-                }
-                return;
-            }
-
-            const rect = rend.domElement.getBoundingClientRect();
-            mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-            mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-            raycaster.setFromCamera(mouse, cam);
-
-            // Test étoiles
-            const starGroups = entries.map(e => e.group);
-            const hits = raycaster.intersectObjects(starGroups, true);
-            const starHit = hits.find(h => h.object.userData.body);
-            const starBody = starHit ? (starHit.object.userData.body as CelestialBody) : null;
-            if (hoveredStarId !== (starBody?.id ?? null)) {
-                hoveredStarId = starBody?.id ?? null;
-                onHover(starBody);
-            }
-
-            // Test constellations
-            if (!starBody && showConstellations && constGroupRef.current) {
-                const constHits = raycaster.intersectObjects(constGroupRef.current.children, true);
-                const constHit = constHits.find(h => h.object.userData.constellation);
-                const constData = constHit ? constHit.object.userData.constellation : null;
-                if (hoveredConstId !== (constData?.id ?? null)) {
-                    hoveredConstId = constData?.id ?? null;
-                    setHoveredConst(constData ?? null);
-                }
-            } else if (hoveredConstId) {
-                hoveredConstId = null;
-                setHoveredConst(null);
-            }
-
-            if (rend) {
-                rend.domElement.style.cursor = (starBody || hoveredConstId) ? 'pointer' : 'default';
-            }
-        };
-
-        const handleClick = (e: MouseEvent) => {
-            const rend = renderer.current;
-            const cam = camera.current;
-            if (!rend || !cam) return;
-
-            const targetEl = e.target as HTMLElement | null;
-            if (targetEl?.closest('button, input, a, aside, nav, .pointer-events-auto')) {
-                return;
-            }
-
-            const rect = rend.domElement.getBoundingClientRect();
-            mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-            mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-            raycaster.setFromCamera(mouse, cam);
-
-            const hits = raycaster.intersectObjects(starEntriesRef.current.map(e => e.group), true);
-            const hit = hits.find(h => h.object.userData.body);
-            if (hit) {
-                const body = hit.object.userData.body as CelestialBody;
-                if (isMeasuringMode) addDistancePoint(body);
-                else onSelect(body);
-            }
-        };
-
-        window.addEventListener('mousemove', handleMove);
-        window.addEventListener('click', handleClick);
-
         return () => {
             cleanupAnim();
-            window.removeEventListener('mousemove', handleMove);
-            window.removeEventListener('click', handleClick);
         };
     }, [
-        isReady, registerAnimation, onHover, onSelect,
-        orientation, zoom, showGrid, showMilkyWay, showConstellations,
-        perspectiveMode, isMeasuringMode, distancePoints, addDistancePoint,
-        camera, renderer,
+        isReady, registerAnimation,
+        showGrid, showMilkyWay, showConstellations,
+        perspectiveMode, isMeasuringMode, distancePoints,
     ]);
-
-    // ── Contrôle drag pour orientation héliocentrique ─────────────────────────
-    useEffect(() => {
-        const el = renderer.current?.domElement;
-        if (!el || perspectiveMode === 'free') return;
-        let dragging = false;
-        let last = { x: 0, y: 0 };
-        const onDown = (e: MouseEvent) => { dragging = true; last = { x: e.clientX, y: e.clientY }; };
-        const onMove = (e: MouseEvent) => {
-            if (!dragging) return;
-            const dx = e.clientX - last.x;
-            const dy = e.clientY - last.y;
-            let rot = orientation.rotation + dx * 0.5;
-            if (rot > 180) rot -= 360;
-            if (rot < -180) rot += 360;
-            const inc = Math.max(0, Math.min(90, orientation.inclination - dy * 0.3));
-            setOrientation({ rotation: rot, inclination: inc });
-            last = { x: e.clientX, y: e.clientY };
-        };
-        const onUp = () => { dragging = false; };
-        el.addEventListener('mousedown', onDown);
-        window.addEventListener('mousemove', onMove, { passive: true });
-        window.addEventListener('mouseup', onUp);
-        return () => {
-            el.removeEventListener('mousedown', onDown);
-            window.removeEventListener('mousemove', onMove);
-            window.removeEventListener('mouseup', onUp);
-        };
-    }, [renderer, orientation, setOrientation, perspectiveMode]);
 
     // ── Rendu UI overlay ──────────────────────────────────────────────────────
     return (
         <div className="absolute inset-0 pointer-events-none select-none">
-            {/* En-tête viewport */}
-            <div className="absolute top-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 bg-black/80 backdrop-blur-2xl px-10 py-4 rounded-full border border-white/10 shadow-2xl">
-                <span className="font-mono text-[8px] uppercase text-white/40 tracking-[0.4em] font-black">Deep Sky Navigator</span>
+            {/* En-tête viewport (desktop/tablette) */}
+            <div className="hidden md:flex absolute top-8 left-1/2 -translate-x-1/2 flex-col items-center gap-1 bg-black/80 backdrop-blur-2xl px-10 py-3.5 rounded-full border border-white/10 shadow-2xl">
+                <span className="font-mono text-[9px] uppercase text-white/40 tracking-[0.4em] font-black">Deep Sky Navigator</span>
                 <span className="font-mono text-[12px] text-[var(--accent-primary)] font-black tracking-[0.2em] uppercase">
                     Galactic Sector :: MILKY_WAY
                 </span>
             </div>
 
-            {/* Brackets HUD */}
-            <div className="absolute top-8 left-8 w-8 h-8 border-t-2 border-l-2 border-[var(--accent-primary)]/30 rounded-tl-2xl" />
-            <div className="absolute top-8 right-8 w-8 h-8 border-t-2 border-r-2 border-[var(--accent-primary)]/30 rounded-tr-2xl" />
-            <div className="absolute bottom-8 left-8 w-8 h-8 border-b-2 border-l-2 border-[var(--accent-primary)]/30 rounded-bl-2xl" />
-            <div className="absolute bottom-8 right-8 w-8 h-8 border-b-2 border-r-2 border-[var(--accent-primary)]/30 rounded-br-2xl" />
+            {/* Brackets HUD (safe areas) */}
+            <div className="absolute top-4 left-4 sm:top-8 sm:left-8 w-6 h-6 sm:w-8 sm:h-8 border-t-2 border-l-2 border-[var(--accent-primary)]/30 rounded-tl-xl sm:rounded-tl-2xl" />
+            <div className="absolute top-4 right-4 sm:top-8 sm:right-8 w-6 h-6 sm:w-8 sm:h-8 border-t-2 border-r-2 border-[var(--accent-primary)]/30 rounded-tr-xl sm:rounded-tr-2xl" />
+            <div className="absolute bottom-4 left-4 sm:bottom-8 sm:left-8 w-6 h-6 sm:w-8 sm:h-8 border-b-2 border-l-2 border-[var(--accent-primary)]/30 rounded-bl-xl sm:rounded-bl-2xl" />
+            <div className="absolute bottom-4 right-4 sm:bottom-8 sm:right-8 w-6 h-6 sm:w-8 sm:h-8 border-b-2 border-r-2 border-[var(--accent-primary)]/30 rounded-br-xl sm:rounded-br-2xl" />
 
-            {/* Toggle constellations */}
-            <div className="absolute top-24 left-6 pointer-events-auto">
+            {/* Toggle constellations (visible sur desktop ; sur mobile contrôlé via le mode gestuel/barre) */}
+            <div className="hidden sm:block absolute top-24 left-6 pointer-events-auto">
                 <button
                     onClick={() => setShowConstellations(!showConstellations)}
-                    className={`flex items-center gap-3 px-5 py-2.5 rounded-full border transition-all backdrop-blur-3xl text-[9px] font-black uppercase tracking-[0.2em] ${showConstellations
+                    className={`flex items-center gap-3 px-5 py-2.5 min-h-[44px] rounded-full border transition-all backdrop-blur-3xl text-[9px] font-black uppercase tracking-[0.2em] cursor-pointer ${showConstellations
                         ? 'bg-[var(--accent-primary)]/10 border-[var(--accent-primary)] text-[var(--accent-primary)]'
                         : 'bg-black/60 border-white/10 text-white/40 hover:text-white'
                         }`}
@@ -606,41 +613,51 @@ export const SkyMapView: React.FC<SkyMapViewProps> = ({ onSelect, onHover }) => 
                 </button>
             </div>
 
-            {/* Info constellation au survol */}
+            {/* Info constellation au survol ou tap */}
             <AnimatePresence>
                 {hoveredConst && (
                     <motion.div
                         key={hoveredConst.id}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                        className="absolute top-40 left-6 monolith-panel p-6 w-[300px] border-[var(--accent-primary)]/20 pointer-events-none z-40"
+                        initial={{ opacity: 0, y: 16, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 16, scale: 0.95 }}
+                        className="absolute top-20 xs:top-24 left-3 right-3 sm:top-40 sm:left-6 sm:right-auto monolith-panel p-4 sm:p-6 sm:w-[320px] max-h-[42vh] sm:max-h-[55vh] overflow-y-auto border-[var(--accent-primary)]/20 pointer-events-auto z-40 shadow-2xl"
                     >
-                        <div className="flex items-center gap-3 mb-3">
-                            <Sparkles size={12} className="text-[var(--accent-primary)]" />
-                            <span className="font-mono text-[8px] uppercase text-[var(--accent-primary)] font-black tracking-[0.4em]">Pattern Lock</span>
+                        <div className="flex items-center justify-between mb-3 border-b border-white/5 pb-2">
+                            <div className="flex items-center gap-2.5">
+                                <Sparkles size={12} className="text-[var(--accent-primary)]" />
+                                <span className="font-mono text-[8px] uppercase text-[var(--accent-primary)] font-black tracking-[0.3em]">Pattern Lock</span>
+                            </div>
+                            <button
+                                onClick={() => setHoveredConst(null)}
+                                className="w-8 h-8 sm:w-7 sm:h-7 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 flex items-center justify-center text-white/70 hover:text-white transition-all cursor-pointer touch-target"
+                                title="Close Constellation Details"
+                                aria-label="Close Constellation Details"
+                            >
+                                <X size={14} />
+                            </button>
                         </div>
-                        <h4 className="text-xl font-black uppercase text-white tracking-tight mb-2">{hoveredConst.name}</h4>
-                        <p className="text-xs text-[#6c6c7a] leading-relaxed mb-4">{hoveredConst.description}</p>
+                        <h4 className="text-lg sm:text-xl font-black uppercase text-white tracking-tight mb-1.5">{hoveredConst.name}</h4>
+                        <p className="text-xs text-[#8e8e9f] leading-relaxed mb-3">{hoveredConst.description}</p>
                         {hoveredConst.astronomicalContext && (
-                            <div className="bg-white/5 p-3 rounded-xl border border-white/5">
-                                <div className="flex items-center gap-2 mb-2">
+                            <div className="bg-white/5 p-3 rounded-xl border border-white/5 mb-3">
+                                <div className="flex items-center gap-2 mb-1.5">
                                     <Info size={10} className="text-[var(--accent-primary)]" />
-                                    <span className="font-mono text-[7px] uppercase text-white/40 font-black">Contexte Scientifique</span>
+                                    <span className="font-mono text-[8px] uppercase text-white/50 font-black">Contexte Scientifique</span>
                                 </div>
-                                <p className="text-[10px] text-white/60 leading-relaxed">{hoveredConst.astronomicalContext}</p>
+                                <p className="text-[10px] text-white/70 leading-relaxed">{hoveredConst.astronomicalContext}</p>
                             </div>
                         )}
                         {hoveredConst.area && (
-                            <div className="flex gap-4 mt-3 pt-3 border-t border-white/5">
+                            <div className="flex gap-4 pt-2 border-t border-white/5">
                                 <div>
-                                    <span className="text-[7px] text-[#6c6c7a] uppercase font-black block">Superficie</span>
-                                    <span className="text-white text-[9px] font-bold">{hoveredConst.area}</span>
+                                    <span className="text-[8px] text-[#8e8e9f] uppercase font-black block">Superficie</span>
+                                    <span className="text-white text-[10px] font-bold">{hoveredConst.area}</span>
                                 </div>
                                 {hoveredConst.bestObservation && (
                                     <div>
-                                        <span className="text-[7px] text-[#6c6c7a] uppercase font-black block">Observation</span>
-                                        <span className="text-white text-[9px] font-bold">{hoveredConst.bestObservation}</span>
+                                        <span className="text-[8px] text-[#8e8e9f] uppercase font-black block">Observation</span>
+                                        <span className="text-white text-[10px] font-bold">{hoveredConst.bestObservation}</span>
                                     </div>
                                 )}
                             </div>
@@ -650,7 +667,7 @@ export const SkyMapView: React.FC<SkyMapViewProps> = ({ onSelect, onHover }) => 
             </AnimatePresence>
 
             {/* Vignette */}
-            <div className="absolute inset-0 shadow-[inset_0_0_200px_rgba(0,0,0,0.8)] pointer-events-none" />
+            <div className="absolute inset-0 shadow-[inset_0_0_120px_rgba(0,0,0,0.6)] sm:shadow-[inset_0_0_200px_rgba(0,0,0,0.8)] pointer-events-none" />
         </div>
     );
 };

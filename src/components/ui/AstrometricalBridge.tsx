@@ -58,9 +58,9 @@ export const AstrometricalBridge: React.FC<AstrometricalBridgeProps> = ({
                 <div className="space-y-6">
                     <div className="flex items-center justify-between gap-4">
                         {/* Node A */}
-                        <div className="flex flex-col items-center gap-3 flex-1 max-w-[80px]">
+                        <div className="flex flex-col items-center gap-2 flex-1 max-w-[80px]">
                             <div
-                                className={`w-12 h-12 rounded-full border flex items-center justify-center transition-all ${
+                                className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full border flex items-center justify-center transition-all ${
                                     pointA 
                                         ? "bg-white/5 text-white" 
                                         : "bg-black/20 border-dashed border-white/10 text-white/20"
@@ -71,7 +71,7 @@ export const AstrometricalBridge: React.FC<AstrometricalBridgeProps> = ({
                                     color: pointA.colors[0]
                                 } : {}}
                             >
-                                <Radio size={20} className={pointA ? "animate-pulse" : ""} />
+                                <Radio size={18} className={pointA ? "animate-pulse" : ""} />
                             </div>
                             <span className="text-[8px] font-black uppercase text-white/40 text-center truncate w-full">
                                 {pointA ? pointA.name : "Point A"}
@@ -79,14 +79,14 @@ export const AstrometricalBridge: React.FC<AstrometricalBridgeProps> = ({
                         </div>
 
                         {/* Connection Laser Line & Info */}
-                        <div className="flex-1 flex flex-col items-center gap-2">
-                            <div className="flex items-center gap-1 mb-1">
+                        <div className="flex-1 flex flex-col items-center gap-2 min-w-0">
+                            <div className="flex items-center gap-1 mb-1 truncate max-w-full">
                                 {customDistance ? (
                                     <>
-                                        <span className="text-[10px] font-mono text-[var(--accent-primary)] font-black tracking-tighter">{customDistance}</span>
+                                        <span className="text-[10px] font-mono text-[var(--accent-primary)] font-black tracking-tighter truncate">{customDistance}</span>
                                     </>
                                 ) : (
-                                    <span className="text-[8px] text-[#6c6c7a] font-bold uppercase tracking-widest animate-pulse">
+                                    <span className="text-[8px] text-[#6c6c7a] font-bold uppercase tracking-widest animate-pulse truncate">
                                         Select {pointA ? "Point B" : "Point A"}
                                     </span>
                                 )}
@@ -105,9 +105,9 @@ export const AstrometricalBridge: React.FC<AstrometricalBridgeProps> = ({
                         </div>
 
                         {/* Node B */}
-                        <div className="flex flex-col items-center gap-3 flex-1 max-w-[80px]">
+                        <div className="flex flex-col items-center gap-2 flex-1 max-w-[80px]">
                             <div
-                                className={`w-12 h-12 rounded-full border flex items-center justify-center transition-all ${
+                                className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full border flex items-center justify-center transition-all ${
                                     pointB 
                                         ? "bg-white/5 text-white" 
                                         : "bg-black/20 border-dashed border-white/10 text-white/20"
@@ -118,7 +118,7 @@ export const AstrometricalBridge: React.FC<AstrometricalBridgeProps> = ({
                                     color: pointB.colors[0]
                                 } : {}}
                             >
-                                <Radio size={20} className={pointB ? "animate-pulse" : ""} />
+                                <Radio size={18} className={pointB ? "animate-pulse" : ""} />
                             </div>
                             <span className="text-[8px] font-black uppercase text-white/40 text-center truncate w-full">
                                 {pointB ? pointB.name : "Point B"}
@@ -130,9 +130,9 @@ export const AstrometricalBridge: React.FC<AstrometricalBridgeProps> = ({
                         {distancePoints.length > 0 && (
                             <button
                                 onClick={clearDistancePoints}
-                                className="flex-1 bg-white/5 border border-white/5 hover:border-white/10 text-white/60 hover:text-white font-black text-[9px] py-2 rounded-xl uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+                                className="flex-1 bg-white/5 border border-white/5 hover:border-white/10 text-white/60 hover:text-white font-black text-[9px] py-2.5 min-h-[44px] rounded-xl uppercase tracking-widest transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98"
                             >
-                                <RotateCcw size={10} /> Reset Points
+                                <RotateCcw size={12} /> Reset Points
                             </button>
                         )}
                     </div>

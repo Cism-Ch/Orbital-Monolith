@@ -47,6 +47,8 @@
 
 ## 🏗️ Architecture & Project Structure
 
+> 📐 Full technical architecture (WebGL engine lifecycle, state model, data flows, ADRs, technical debt): see [docs/SYSTEM_DESIGN.md](docs/SYSTEM_DESIGN.md).
+
 ```text
 Orbital-Monolith/
 ├── src/

@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @theme {
+  --breakpoint-xs: 23.4375rem;
   --color-accent-primary: var(--accent-primary);
   --color-accent-secondary: var(--accent-secondary);
   --shadow-accent-glow: 0 0 15px rgba(77, 238, 234, 0.5);
@@ -15,7 +16,11 @@
   --accent-primary: #4deeea;
   --accent-secondary: #2a6968;
   --text-main: #e1e1e6;
-  --text-dim: #6c6c7a;
+  --text-dim: #8e8e9f;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
 }
 
 body {
@@ -23,6 +28,7 @@ body {
   color: var(--text-main);
   overflow: hidden;
   height: 100vh;
+  height: 100dvh;
 }
 
 .monolith-panel {
@@ -245,4 +251,52 @@ html[data-hyperspatial="false"] .scanline {
 .no-scrollbar {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
+}
+
+/* Safe Area Inset Helpers */
+.pt-safe {
+  padding-top: max(env(safe-area-inset-top, 0px), 0.75rem);
+}
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 0.75rem);
+}
+.pl-safe {
+  padding-left: max(env(safe-area-inset-left, 0px), 0.75rem);
+}
+.pr-safe {
+  padding-right: max(env(safe-area-inset-right, 0px), 0.75rem);
+}
+
+/* Minimum tactile interaction target (44x44px standard) */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Mobile responsive typography adjustments - fluid scaling between 320px and 767px */
+@media (max-width: 767px) {
+  /* Prevent microscopic fonts collapsing below legibility threshold on handheld screens */
+  .text-\[7px\], .text-\[7\.5px\], .text-\[8px\], .text-\[8\.5px\] {
+    font-size: clamp(9px, 2.4vw, 11px) !important;
+  }
+  .text-\[9px\] {
+    font-size: clamp(10px, 2.7vw, 12px) !important;
+  }
+  .text-\[10px\] {
+    font-size: clamp(10.5px, 2.9vw, 12.5px) !important;
+  }
+  .text-\[11px\] {
+    font-size: clamp(11px, 3.1vw, 13px) !important;
+  }
+  /* Fluid padding adjustment for mobile containers */
+  .mobile-fluid-p {
+    padding: clamp(0.75rem, 3.5vw, 1.25rem);
+  }
+}
+
+/* Reduced motion preference respect */
+@media (prefers-reduced-motion: reduce) {
+  .scanline, .grain, .animate-pulse, .animate-ping, .animate-spin-slow {
+    animation: none !important;
+  }
 }

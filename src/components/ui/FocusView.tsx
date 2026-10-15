@@ -46,10 +46,10 @@ export const FocusView: React.FC<FocusViewProps> = ({ body, onClose }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 lg:p-12 font-mono pointer-events-auto"
+            className="fixed inset-0 z-[100] flex items-center justify-center p-0 sm:p-6 lg:p-12 font-mono pointer-events-auto"
         >
             {/* Backdrop avec flou et détection de clic pour fermeture */}
-            <div className="absolute inset-0 bg-black/70 backdrop-blur-3xl cursor-pointer" onClick={onClose} />
+            <div className="absolute inset-0 bg-black/75 backdrop-blur-3xl cursor-pointer" onClick={onClose} />
 
             {/* Immersive Scanning Effect */}
             <motion.div
@@ -60,22 +60,24 @@ export const FocusView: React.FC<FocusViewProps> = ({ body, onClose }) => {
             />
 
             <motion.div
-                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                initial={{ scale: 0.95, opacity: 0, y: 15 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 1.1, opacity: 0 }}
-                className="relative w-full h-full max-w-7xl monolith-panel !rounded-3xl sm:!rounded-[3rem] lg:!rounded-[4rem] !bg-black/90 flex flex-col lg:flex-row overflow-hidden border-white/10 shadow-[0_0_100px_rgba(0,0,0,0.8)]"
+                exit={{ scale: 1.05, opacity: 0 }}
+                className="relative w-full h-full max-w-7xl monolith-panel !rounded-none sm:!rounded-[2.5rem] lg:!rounded-[3.5rem] !bg-black/95 flex flex-col lg:flex-row overflow-hidden border-white/10 shadow-[0_0_100px_rgba(0,0,0,0.8)]"
             >
                 {/* Close Button Capsule */}
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 sm:top-8 sm:right-8 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all z-50 group cursor-pointer"
+                    style={{ top: 'max(1rem, env(safe-area-inset-top, 0px))' }}
+                    className="absolute right-4 sm:top-8 sm:right-8 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white hover:bg-white/20 active:scale-95 transition-all z-50 group cursor-pointer touch-target"
                     title="Close Focus View (Esc)"
+                    aria-label="Close Focus View"
                 >
                     <X size={18} className="group-hover:rotate-90 transition-transform" />
                 </button>
 
                 {/* Left Side: Visual & Core Data */}
-                <div className="flex-1 p-5 sm:p-8 lg:p-12 flex flex-col gap-6 relative justify-between overflow-y-auto custom-scrollbar">
+                <div className="flex-1 p-4 sm:p-8 lg:p-12 flex flex-col gap-6 relative justify-between overflow-y-auto custom-scrollbar">
                     <div className="flex flex-col lg:flex-row gap-6 sm:gap-8 items-center lg:items-start">
                         {/* 3D Hologram Viewer */}
                         <div className="flex-shrink-0 relative w-full max-w-[240px] sm:w-[280px] h-[220px] sm:h-[320px] flex items-center justify-center bg-white/[0.01] border border-white/5 rounded-2xl sm:rounded-[3rem] overflow-hidden group shadow-[inset_0_0_50px_rgba(0,0,0,0.5)]">
@@ -151,7 +153,7 @@ export const FocusView: React.FC<FocusViewProps> = ({ body, onClose }) => {
                 </div>
 
                 {/* Right Side: Telemetry & Live Stream */}
-                <div className="w-full lg:w-[450px] bg-white/[0.02] border-l border-white/5 p-12 flex flex-col gap-8">
+                <div className="w-full lg:w-[450px] bg-white/[0.02] border-t lg:border-t-0 lg:border-l border-white/5 p-4 sm:p-8 lg:p-12 flex flex-col gap-6 sm:gap-8">
                     <div className="space-y-6 flex-1">
                         <div className="flex items-center justify-between">
                             <h3 className="text-white text-[10px] font-black uppercase tracking-[0.3em]">Live_Stream :: {body.id.toUpperCase()}</h3>
@@ -161,14 +163,14 @@ export const FocusView: React.FC<FocusViewProps> = ({ body, onClose }) => {
                             </div>
                         </div>
 
-                        <div className="flex-1 min-h-[400px]">
+                        <div className="flex-1 min-h-[300px] sm:min-h-[400px]">
                             <TelemetryStream body={body} />
                         </div>
                     </div>
 
                     <button
                         onClick={onClose}
-                        className="w-full py-6 rounded-full bg-[var(--accent-primary)] text-black font-black uppercase text-xs tracking-[0.3em] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_10px_40px_rgba(var(--accent-primary-rgb),0.3)] cursor-pointer"
+                        className="w-full py-4 sm:py-5 min-h-[44px] rounded-full bg-[var(--accent-primary)] text-black font-black uppercase text-xs tracking-[0.25em] hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-lg"
                     >
                         Close Telemetry Link →
                     </button>

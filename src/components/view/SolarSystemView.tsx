@@ -11,12 +11,13 @@
  * - Overlay UI uniquement, aucun canvas
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three-stdlib';
 
 import { useUniverseEngine } from '@/lib/UniverseEngineContext';
 import { useDashboard } from '@/lib/DashboardContext';
+import { useScenePointer } from '@/hooks/useScenePointer';
 import { SOLAR_SYSTEM } from '@/constants';
 import { CelestialType, type CelestialBody } from '@/types';
 
@@ -62,7 +63,7 @@ export const SolarSystemView: React.FC<SolarSystemViewProps> = ({ onSelect, onHo
     const { scene, camera, renderer, registerAnimation, isReady } = useUniverseEngine();
     const {
         orientation, setOrientation,
-        zoom,
+        zoom, setZoom,
         showGrid,
         showMilkyWay,
         perspectiveMode,
@@ -324,7 +325,15 @@ export const SolarSystemView: React.FC<SolarSystemViewProps> = ({ onSelect, onHo
         };
     }, [isReady, scene, camera]);
 
-    // ── OrbitControls ─────────────────────────────────────────────────────────
+    // ── Références d'état synchronisées pour la boucle RAF ────────────────────
+    const orientationRef = useRef(orientation);
+    orientationRef.current = orientation;
+    const zoomRef = useRef(zoom);
+    zoomRef.current = zoom;
+    const hoveredIdRef = useRef<string | null>(null);
+    const raycasterRef = useRef<THREE.Raycaster>(new THREE.Raycaster());
+
+    // ── OrbitControls (mode free) ─────────────────────────────────────────────
     useEffect(() => {
         const cam = camera.current;
         const rend = renderer.current;
@@ -338,30 +347,96 @@ export const SolarSystemView: React.FC<SolarSystemViewProps> = ({ onSelect, onHo
         controls.dampingFactor = 0.05;
         controls.minDistance = 150;
         controls.maxDistance = 5000;
+        // Configuration tactile fluide pour smartphone & tablette
+        controls.touches = {
+            ONE: THREE.TOUCH.ROTATE,
+            TWO: THREE.TOUCH.DOLLY_PAN,
+        };
         controlsRef.current = controls;
         return () => { controls.dispose(); controlsRef.current = null; };
     }, [perspectiveMode, camera, renderer]);
 
-    // ── Boucle d'animation ────────────────────────────────────────────────────
+    // ── Callbacks gestuels unifiés (useScenePointer) ───────────────────────────
+    const handleRotate = useCallback((deltaRot: number, deltaInc: number) => {
+        if (perspectiveMode === 'free') return;
+        setOrientation({
+            rotation: ((((orientationRef.current.rotation + deltaRot) + 180) % 360 + 360) % 360) - 180,
+            inclination: Math.max(0, Math.min(90, orientationRef.current.inclination + deltaInc)),
+        });
+    }, [perspectiveMode, setOrientation]);
+
+    const handleZoom = useCallback((zoomDelta: number) => {
+        if (perspectiveMode === 'free') return;
+        setZoom(Math.max(0.05, Math.min(5, zoomRef.current + zoomDelta)));
+    }, [perspectiveMode, setZoom]);
+
+    const handleTap = useCallback((_e: PointerEvent, ndc: { x: number; y: number }) => {
+        const cam = camera.current;
+        if (!cam) return;
+
+        raycasterRef.current.setFromCamera(new THREE.Vector2(ndc.x, ndc.y), cam);
+        const hits = raycasterRef.current.intersectObjects(scene.children, true);
+        const hit = hits.find(h => h.object.userData.body);
+        if (hit) {
+            const body = hit.object.userData.body as CelestialBody;
+            if (isMeasuringMode) addDistancePoint(body);
+            else onSelect(body);
+        }
+    }, [camera, scene, isMeasuringMode, addDistancePoint, onSelect]);
+
+    const handleHover = useCallback((ndc: { x: number; y: number } | null) => {
+        const rend = renderer.current;
+        const cam = camera.current;
+        if (!rend || !cam || !ndc) {
+            if (hoveredIdRef.current !== null) {
+                hoveredIdRef.current = null;
+                onHover(null);
+                if (rend) rend.domElement.style.cursor = 'default';
+            }
+            return;
+        }
+
+        raycasterRef.current.setFromCamera(new THREE.Vector2(ndc.x, ndc.y), cam);
+        const hits = raycasterRef.current.intersectObjects(scene.children, true);
+        const hit = hits.find(h => h.object.userData.body);
+        const body = hit ? (hit.object.userData.body as CelestialBody) : null;
+        const newId = body?.id ?? null;
+
+        if (hoveredIdRef.current !== newId) {
+            hoveredIdRef.current = newId;
+            onHover(body);
+            if (rend) rend.domElement.style.cursor = body ? 'pointer' : 'default';
+        }
+    }, [camera, renderer, scene, onHover]);
+
+    // Activation du hook gestuel sur le canvas WebGL persistant
+    useScenePointer({
+        element: renderer.current?.domElement ?? null,
+        enabled: isReady,
+        onRotate: handleRotate,
+        onZoom: handleZoom,
+        onTap: handleTap,
+        onHover: handleHover,
+    });
+
+    // ── Boucle d'animation (continue sans re-montage intempestif) ───────────────
     useEffect(() => {
         if (!isReady) return;
         const planets = planetsRef.current;
-        let hoveredId: string | null = null;
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
 
         const cleanupAnim = registerAnimation((time, scene, cam) => {
             // Contrôle caméra
             if (perspectiveMode === 'heliocentric') {
                 scene.rotation.x = THREE.MathUtils.lerp(
-                    scene.rotation.x, THREE.MathUtils.degToRad(orientation.inclination), 0.05
+                    scene.rotation.x, THREE.MathUtils.degToRad(orientationRef.current.inclination), 0.08
                 );
                 scene.rotation.y = THREE.MathUtils.lerp(
-                    scene.rotation.y, THREE.MathUtils.degToRad(orientation.rotation), 0.05
+                    scene.rotation.y, THREE.MathUtils.degToRad(orientationRef.current.rotation), 0.08
                 );
-                const effectiveZoom = zoom <= 0 ? (0.3 + zoom * 0.7) : zoom;
+                const curZoom = zoomRef.current;
+                const effectiveZoom = curZoom <= 0 ? (0.3 + curZoom * 0.7) : curZoom;
                 const targetZ = 1200 / Math.max(0.05, effectiveZoom);
-                cam.position.z = THREE.MathUtils.lerp(cam.position.z, targetZ, 0.05);
+                cam.position.z = THREE.MathUtils.lerp(cam.position.z, targetZ, 0.08);
             } else {
                 controlsRef.current?.update();
                 scene.rotation.x = THREE.MathUtils.lerp(scene.rotation.x, 0, 0.05);
@@ -374,7 +449,7 @@ export const SolarSystemView: React.FC<SolarSystemViewProps> = ({ onSelect, onHo
 
             // Animation Soleil
             if (sunRef.current) {
-                const isHov = hoveredId === SOLAR_SYSTEM[0].id;
+                const isHov = hoveredIdRef.current === SOLAR_SYSTEM[0].id;
                 const s = sunRef.current;
                 s.mesh.rotation.y += 0.004;
                 s.mesh.scale.setScalar(THREE.MathUtils.lerp(s.mesh.scale.x, isHov ? 1.3 : 1.0, 0.1));
@@ -392,7 +467,7 @@ export const SolarSystemView: React.FC<SolarSystemViewProps> = ({ onSelect, onHo
                 p.glow.position.set(x, 0, z);
                 p.mesh.rotation.y += 0.008;
 
-                const isHov = hoveredId === p.body.id;
+                const isHov = hoveredIdRef.current === p.body.id;
                 const targetScale = isHov ? 1.6 : 1.0;
                 p.mesh.scale.setScalar(THREE.MathUtils.lerp(p.mesh.scale.x, targetScale, 0.12));
                 p.glow.scale.copy(p.mesh.scale);
@@ -431,124 +506,34 @@ export const SolarSystemView: React.FC<SolarSystemViewProps> = ({ onSelect, onHo
             void time;
         });
 
-        // ── Interactions ───────────────────────────────────────────────────
-        const handleMove = (e: MouseEvent) => {
-            const rend = renderer.current;
-            const cam = camera.current;
-            if (!rend || !cam) return;
-
-            // Éviter le survol 3D si la souris pointe sur un panneau UI interactif
-            const targetEl = e.target as HTMLElement | null;
-            if (targetEl?.closest('button, input, a, aside, nav, .pointer-events-auto')) {
-                if (hoveredId !== null) {
-                    hoveredId = null;
-                    onHover(null);
-                    if (rend) rend.domElement.style.cursor = 'default';
-                }
-                return;
-            }
-
-            const rect = rend.domElement.getBoundingClientRect();
-            mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-            mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-            raycaster.setFromCamera(mouse, cam);
-
-            const hits = raycaster.intersectObjects(scene.children, true);
-            const hit = hits.find(h => h.object.userData.body);
-            const body = hit ? (hit.object.userData.body as CelestialBody) : null;
-
-            if (hoveredId !== (body?.id ?? null)) {
-                hoveredId = body?.id ?? null;
-                onHover(body);
-                if (rend) rend.domElement.style.cursor = body ? 'pointer' : 'default';
-            }
-        };
-
-        const handleClick = (e: MouseEvent) => {
-            const rend = renderer.current;
-            const cam = camera.current;
-            if (!rend || !cam) return;
-
-            // Ne pas intercepter le clic si l'utilisateur cliquait sur une UI
-            const targetEl = e.target as HTMLElement | null;
-            if (targetEl?.closest('button, input, a, aside, nav, .pointer-events-auto')) {
-                return;
-            }
-
-            const rect = rend.domElement.getBoundingClientRect();
-            mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-            mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-            raycaster.setFromCamera(mouse, cam);
-
-            const hits = raycaster.intersectObjects(scene.children, true);
-            const hit = hits.find(h => h.object.userData.body);
-            if (hit) {
-                const body = hit.object.userData.body as CelestialBody;
-                if (isMeasuringMode) addDistancePoint(body);
-                else onSelect(body);
-            }
-        };
-
-        window.addEventListener('mousemove', handleMove);
-        window.addEventListener('click', handleClick);
-
         return () => {
             cleanupAnim();
-            window.removeEventListener('mousemove', handleMove);
-            window.removeEventListener('click', handleClick);
         };
     }, [
-        isReady, registerAnimation, onHover, onSelect,
-        orientation, zoom, showGrid, showMilkyWay, perspectiveMode,
-        isMeasuringMode, distancePoints, addDistancePoint,
-        camera, renderer, scene,
+        isReady, registerAnimation,
+        showGrid, showMilkyWay, perspectiveMode,
+        isMeasuringMode, distancePoints,
     ]);
-
-    // ── Drag orientation hélio ────────────────────────────────────────────────
-    useEffect(() => {
-        const el = renderer.current?.domElement;
-        if (!el || perspectiveMode === 'free') return;
-        let dragging = false, last = { x: 0, y: 0 };
-        const onDown = (e: MouseEvent) => { dragging = true; last = { x: e.clientX, y: e.clientY }; };
-        const onMove = (e: MouseEvent) => {
-            if (!dragging) return;
-            let rot = orientation.rotation + (e.clientX - last.x) * 0.5;
-            if (rot > 180) rot -= 360;
-            if (rot < -180) rot += 360;
-            const inc = Math.max(0, Math.min(90, orientation.inclination - (e.clientY - last.y) * 0.3));
-            setOrientation({ rotation: rot, inclination: inc });
-            last = { x: e.clientX, y: e.clientY };
-        };
-        const onUp = () => { dragging = false; };
-        el.addEventListener('mousedown', onDown);
-        window.addEventListener('mousemove', onMove, { passive: true });
-        window.addEventListener('mouseup', onUp);
-        return () => {
-            el.removeEventListener('mousedown', onDown);
-            window.removeEventListener('mousemove', onMove);
-            window.removeEventListener('mouseup', onUp);
-        };
-    }, [renderer, orientation, setOrientation, perspectiveMode]);
 
     // ── UI overlay ────────────────────────────────────────────────────────────
     return (
         <div className="absolute inset-0 pointer-events-none select-none">
-            {/* En-tête */}
-            <div className="absolute top-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 bg-black/80 backdrop-blur-2xl px-10 py-4 rounded-full border border-white/10 shadow-2xl">
-                <span className="font-mono text-[8px] uppercase text-white/40 tracking-[0.4em] font-black">Solar System Visualizer</span>
+            {/* En-tête (affiché sur tablette/desktop pour ne pas encombrer le mobile) */}
+            <div className="hidden md:flex absolute top-8 left-1/2 -translate-x-1/2 flex-col items-center gap-1 bg-black/80 backdrop-blur-2xl px-10 py-3.5 rounded-full border border-white/10 shadow-2xl">
+                <span className="font-mono text-[9px] uppercase text-white/40 tracking-[0.4em] font-black">Solar System Visualizer</span>
                 <span className="font-mono text-[12px] text-[var(--accent-primary)] font-black tracking-[0.2em] uppercase">
                     Sector :: SOL_SYSTEM
                 </span>
             </div>
 
-            {/* Brackets HUD */}
-            <div className="absolute top-8 left-8 w-8 h-8 border-t-2 border-l-2 border-[var(--accent-primary)]/30 rounded-tl-2xl" />
-            <div className="absolute top-8 right-8 w-8 h-8 border-t-2 border-r-2 border-[var(--accent-primary)]/30 rounded-tr-2xl" />
-            <div className="absolute bottom-8 left-8 w-8 h-8 border-b-2 border-l-2 border-[var(--accent-primary)]/30 rounded-bl-2xl" />
-            <div className="absolute bottom-8 right-8 w-8 h-8 border-b-2 border-r-2 border-[var(--accent-primary)]/30 rounded-br-2xl" />
+            {/* Brackets HUD aux 4 coins (adaptés aux écrans mobiles et safe areas) */}
+            <div className="absolute top-4 left-4 sm:top-8 sm:left-8 w-6 h-6 sm:w-8 sm:h-8 border-t-2 border-l-2 border-[var(--accent-primary)]/30 rounded-tl-xl sm:rounded-tl-2xl" />
+            <div className="absolute top-4 right-4 sm:top-8 sm:right-8 w-6 h-6 sm:w-8 sm:h-8 border-t-2 border-r-2 border-[var(--accent-primary)]/30 rounded-tr-xl sm:rounded-tr-2xl" />
+            <div className="absolute bottom-4 left-4 sm:bottom-8 sm:left-8 w-6 h-6 sm:w-8 sm:h-8 border-b-2 border-l-2 border-[var(--accent-primary)]/30 rounded-bl-xl sm:rounded-bl-2xl" />
+            <div className="absolute bottom-4 right-4 sm:bottom-8 sm:right-8 w-6 h-6 sm:w-8 sm:h-8 border-b-2 border-r-2 border-[var(--accent-primary)]/30 rounded-br-xl sm:rounded-br-2xl" />
 
             {/* Vignette */}
-            <div className="absolute inset-0 shadow-[inset_0_0_200px_rgba(0,0,0,0.7)] pointer-events-none" />
+            <div className="absolute inset-0 shadow-[inset_0_0_120px_rgba(0,0,0,0.6)] sm:shadow-[inset_0_0_200px_rgba(0,0,0,0.7)] pointer-events-none" />
         </div>
     );
 };

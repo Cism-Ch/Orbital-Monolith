@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -13,8 +13,16 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-    title: "Celestial Orbital Monolith v2",
-    description: "Advanced Gaia Database Mapping Terminal",
+    title: "Orbital Monolith v3.6 — 3D Space Exploration & Telemetry",
+    description: "Advanced 3D WebGL space exploration and celestial telemetry dashboard.",
+};
+
+export const viewport: Viewport = {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 5,
+    viewportFit: "cover",
+    themeColor: "#050506",
 };
 
 export default function RootLayout({
@@ -23,7 +31,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
+        <html lang="fr" className="bg-[#050506]">
             <body className={`${inter.variable} ${jetbrainsMono.variable} antialiased font-sans`}>
                 <div className="grain" />
                 <div className="scanline" />
