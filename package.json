@@ -1,7 +1,7 @@
 {
   "name": "celestial-orbital-monolith-v2",
   "private": true,
-  "version": "0.0.0",
+  "version": "3.7.0",
   "type": "module",
   "packageManager": "pnpm@12.11.2",
   "scripts": {

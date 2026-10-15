@@ -64,6 +64,14 @@ interface DashboardContextType {
     setShowMilkyWay: (v: boolean) => void;
     showConstellations: boolean;
     setShowConstellations: (v: boolean) => void;
+    showEcliptic: boolean;
+    setShowEcliptic: (v: boolean) => void;
+    showDeepSky: boolean;
+    setShowDeepSky: (v: boolean) => void;
+    showProbes: boolean;
+    setShowProbes: (v: boolean) => void;
+    showAsterisms: boolean;
+    setShowAsterisms: (v: boolean) => void;
 
     // ── Perspective caméra ─────────────────────────────────────────────────────
     perspectiveMode: 'heliocentric' | 'free';
@@ -138,10 +146,14 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
     });
     const [zoom, setZoom] = useState(0.3);
 
-    // Layers : Voie Lactée et Constellations activées par défaut, grille désactivée
+    // Layers : Voie Lactée, Constellations, Écliptique, Objets Messier, Sondes activés par défaut
     const [showGrid, setShowGrid] = useState(false);
     const [showMilkyWay, setShowMilkyWay] = useState(true);
     const [showConstellations, setShowConstellations] = useState(true);
+    const [showEcliptic, setShowEcliptic] = useState(true);
+    const [showDeepSky, setShowDeepSky] = useState(true);
+    const [showProbes, setShowProbes] = useState(true);
+    const [showAsterisms, setShowAsterisms] = useState(true);
     const [perspectiveMode, setPerspectiveMode] = useState<'heliocentric' | 'free'>('heliocentric');
 
     // Mesure de distance
@@ -268,6 +280,10 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
                 showGrid, setShowGrid,
                 showMilkyWay, setShowMilkyWay,
                 showConstellations, setShowConstellations,
+                showEcliptic, setShowEcliptic,
+                showDeepSky, setShowDeepSky,
+                showProbes, setShowProbes,
+                showAsterisms, setShowAsterisms,
                 perspectiveMode, setPerspectiveMode,
                 isMeasuringMode,
                 distancePoints,

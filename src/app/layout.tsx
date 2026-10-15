@@ -13,7 +13,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-    title: "Orbital Monolith v3.6 — 3D Space Exploration & Telemetry",
+    title: "Orbital Monolith v3.7 — 3D Space Exploration & Telemetry",
     description: "Advanced 3D WebGL space exploration and celestial telemetry dashboard.",
 };
 

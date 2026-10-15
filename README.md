@@ -1,5 +1,5 @@
 <div align="center">
-# 🌌 Orbital Monolith v3.6
+# 🌌 Orbital Monolith v3.7
 
 **A cutting-edge 3D WebGL space exploration and celestial telemetry dashboard.**
 
@@ -32,15 +32,16 @@
 
 ## ✨ Key Features
 
+- **🗺️ Complete Celestial Cartography (v3.7)**: 32 authentic IAU constellations with accurate star connections (all 12 Zodiac signs, northern & southern skies), 3D inclined Ecliptic ($23.44^\circ$) with Zodiac glyphs, Messier Deep Sky Objects (M42, M45, M13, M1, M57, Sgr A*), and live NASA Deep Space Network interstellar probes (Voyager 1 & 2, New Horizons, JWST) with Earth radio carrier beams.
 - **🪐 Persistent 3D WebGL Engine (`UniverseEngineContext`)**: High-performance Three.js rendering of planets, stars, and atmospheric glows. The canvas remains mounted across routes for zero-latency, seamless transitions with built-in WebGL context recovery (`webglcontextlost`).
 - **🛰️ Authentic Telemetry Stream (`useTelemetry`)**: Real-time astrophysically accurate data feed detailing orbital velocities, spectral classes, surface gravities, escape velocities, and atmospheric profiles.
 - **🎯 Target Locking & Live Hover Inspection**: Instant live hover previews on stars and planets. Lock targets for deep telemetry analysis or trigger the full-screen `FocusView` inspection mode.
 - **📏 Astrometrical 3D Laser Rangefinder (`AstrometricalBridge`)**: Interactive 3D measurement tool calculating real-time distances between Earth and target bodies, or between any 2 custom selected celestial nodes with dynamic 3D laser line rendering.
-- **🎛️ Collapsible Scene Control Deck (`SceneControlPanel`)**: Dynamic scene customization including rotation angle (-180° to 180°), inclination (0° to 90°), orbital zoom, grid overlays, and Milky Way background toggles. Features a smooth collapse/expand toggle for zero-clutter 3D views.
+- **🎛️ Bottom Capsule Layer Dock & Scene Deck**: Floating glass capsule dock centered at the bottom of the viewport for toggling celestial layers with zero header clutter, paired with a collapsible scene control deck.
 - **🙈 Retractable Edge-Hover Sidebar**: Auto-hiding navigation sidebar that slides out when cursor leaves the left edge, granting 100% viewport width to the WebGL canvas.
 - **🔤 Dynamic Typography & Tooltip Scaling**: Independent global font size scaling (80% to 125%) and specific icon tooltip size control (7px to 14px) with live preview widgets and instant DOM variable synchronization.
 - **🎨 Visual Core Rendering Engine**: Custom glassmorphism opacity control (`--basalt-opacity`), ambient depth intensity (`--ambient-occlusion`), and optional hyper-spatial CRT scanlines (`data-hyperspatial`).
-- **💻 Real-Time System Diagnostics (`Advanced Diagnostics Engine`)**: Live hardware telemetry monitoring actual FPS (calculated via `requestAnimationFrame`), JS Heap memory footprint (`performance.memory`), WebGL GPU renderer hardware string, active catalog node count (264 objects), and `localStorage` byte usage.
+- **💻 Real-Time System Diagnostics (`Advanced Diagnostics Engine`)**: Live hardware telemetry monitoring actual FPS (calculated via `requestAnimationFrame`), JS Heap memory footprint (`performance.memory`), WebGL GPU renderer hardware string, active catalog node count, and `localStorage` byte usage.
 - **🔔 Floating Alert Popover**: Independent notification overlay detached from the sidebar for unhindered alert inspection.
 
 ---

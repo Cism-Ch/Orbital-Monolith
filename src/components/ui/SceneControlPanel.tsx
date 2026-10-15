@@ -2,7 +2,7 @@
 
 /**
  * @file components/ui/SceneControlPanel.tsx
- * @description Panneau de contrôles de scène 3D autonome — Orbital Monolith v3.6.
+ * @description Panneau de contrôles de scène 3D autonome — Orbital Monolith v3.7.
  *
  * Adapté aux choix d'ergonomie mobile :
  * - Sur Desktop (md:) : Panneau dépliable avec sliders d'inclinaison, rotation et zoom.

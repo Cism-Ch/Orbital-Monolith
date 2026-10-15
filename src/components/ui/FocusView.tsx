@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useMemo, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { X, Sparkles, Database, Zap, Activity, ShieldCheck } from 'lucide-react';
-import { CelestialBody } from '@/types';
+import { X, Sparkles, Database, Zap, Activity, ShieldCheck, ExternalLink } from 'lucide-react';
+import { CelestialBody, CelestialType } from '@/types';
 import { TelemetryStream } from './TelemetryStream';
 import { CelestialBody3D } from '@/components/view/CelestialBody3D';
 
@@ -13,7 +13,7 @@ interface FocusViewProps {
 }
 
 export const FocusView: React.FC<FocusViewProps> = ({ body, onClose }) => {
-    // Écoute de la touche Échap pour fermer la vue Focus
+    // Fermeture par touche Échap
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Escape') {
@@ -24,22 +24,6 @@ export const FocusView: React.FC<FocusViewProps> = ({ body, onClose }) => {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [onClose]);
 
-    // Simulated extraction of scientific data from PDF context
-    const scientificIntel = useMemo(() => {
-        const intelMap: Record<string, string> = {
-            'sun': "The anchor of the solar system, containing 99.86% of its total mass. A G2-type main-sequence star generating energy through nuclear fusion in its core. Current stability: STABLE.",
-            'mercury': "The smallest planet in the system, only slightly larger than Earth's Moon. Positioned as the first planet from the Sun, it has no significant atmosphere.",
-            'venus': "Notable for its retrograde rotation (spinning backward compared to most planets). It possesses a thick, toxic atmosphere reflecting high solar radiation.",
-            'earth': "The only known planet to maintain stable bodies of liquid water. Home world and primary reference point for orbital dynamics.",
-            'mars': "Marks the outer boundary of the inner terrestrial system. Known for its iron-oxide rich surface and thin atmosphere.",
-            'jupiter': "The largest planet in the system, 318 times heavier than Earth. A gas giant mostly composed of hydrogen and helium.",
-            'saturn': "Famous for its spectacular ring system composed of countless particles of ice and dust. Second largest gas giant.",
-            'uranus': "An ice giant with a unique orbital tilt, effectively spinning on its side. Composed primarily of water, ammonia, and methane ices.",
-            'neptune': "The most distant major planet, orbiting in the cold reaches of the system. Characterized by supersonic winds and icy composition.",
-            'ceres': "The largest object in the Asteroid Belt and the only dwarf planet located in the inner Solar System."
-        };
-        return intelMap[body.id] || "Academic record currently undergoing encryption. Check Gaia Archive for full dataset update.";
-    }, [body.id]);
 
     return (
         <motion.div
@@ -117,9 +101,17 @@ export const FocusView: React.FC<FocusViewProps> = ({ body, onClose }) => {
 
                             <div className="grid grid-cols-2 gap-4">
                                 {[
-                                    { label: 'Mass', value: body.properties.mass, icon: Database },
-                                    { label: 'Gravity', value: body.properties.gravity, icon: Zap },
-                                    { label: 'Temperature', value: body.properties.temp, icon: Activity },
+                                    { label: 'Masse', value: body.properties.mass, icon: Database },
+                                    {
+                                        label: body.type === CelestialType.PROBE ? 'Vitesse' : 'Gravité',
+                                        value: body.properties.speed || body.properties.gravity,
+                                        icon: Zap
+                                    },
+                                    {
+                                        label: body.type === CelestialType.PROBE ? 'Thermique' : 'Température',
+                                        value: body.properties.temp,
+                                        icon: Activity
+                                    },
                                     { label: 'Distance', value: body.distance || '0 KM', icon: Sparkles }
                                 ].map((stat, i) => (
                                     <motion.div
@@ -140,15 +132,47 @@ export const FocusView: React.FC<FocusViewProps> = ({ body, onClose }) => {
                         </div>
                     </div>
 
-                    {/* Scientific Archive Section (Integrated from Docs) */}
-                    <div className="p-6 rounded-[2rem] bg-[var(--accent-primary)]/5 border border-[var(--accent-primary)]/10 space-y-3">
-                        <div className="flex items-center gap-3">
-                            <ShieldCheck size={16} className="text-[var(--accent-primary)]" />
-                            <h3 className="text-white text-xs font-black uppercase tracking-widest">Gaia_Archive_Extraction [v4.0]</h3>
+                    {/* Dossier scientifique vérifié & Référence officielle NASA / Gaia */}
+                    <div className="p-5 sm:p-6 rounded-[2rem] bg-white/[0.02] border border-white/10 space-y-3">
+                        <div className="flex items-center justify-between flex-wrap gap-2">
+                            <div className="flex items-center gap-2.5">
+                                <ShieldCheck size={16} className="text-[var(--accent-primary)]" />
+                                <h3 className="text-white text-xs font-black uppercase tracking-widest font-mono">
+                                    {body.type === CelestialType.PROBE
+                                        ? 'NASA Deep Space Network (DSN) Live Telemetry'
+                                        : body.type === CelestialType.NEBULA || body.type === CelestialType.DEEP_SKY
+                                        ? 'NASA Hubble & ESA Gaia Deep Sky Survey'
+                                        : body.type === CelestialType.STAR
+                                        ? 'ESA Gaia DR3 & Simbad Archive'
+                                        : 'NASA JPL Horizons Certified Factsheet'}
+                                </h3>
+                            </div>
+                            {body.reference && (
+                                <a 
+                                    href={body.reference} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-[8px] font-mono font-bold text-[var(--accent-primary)] hover:underline flex items-center gap-1 uppercase"
+                                >
+                                    <span>NASA Fact Sheet</span>
+                                    <ExternalLink size={10} />
+                                </a>
+                            )}
                         </div>
-                        <p className="text-white/60 text-xs leading-relaxed italic">
-                            "{scientificIntel}"
-                        </p>
+
+                        {body.funFact && (
+                            <div className="text-[11px] sm:text-xs text-white/80 leading-relaxed font-mono">
+                                <span className="text-[var(--accent-primary)] font-bold">PROPRIÉTÉ NOTABLE :: </span>
+                                {body.funFact}
+                            </div>
+                        )}
+
+                        <div className="flex flex-wrap gap-x-4 gap-y-1.5 pt-2 border-t border-white/5 text-[8px] sm:text-[8.5px] font-mono text-[#8e8e9f]">
+                            {body.properties.period && <span>Période: <strong className="text-white">{body.properties.period}</strong></span>}
+                            {body.properties.escapeVelocity && <span>V_esc: <strong className="text-white">{body.properties.escapeVelocity}</strong></span>}
+                            {body.properties.atmosphere && <span>Atmosphère: <strong className="text-white">{body.properties.atmosphere}</strong></span>}
+                            {body.properties.spectralClass && <span>Spectre: <strong className="text-white">{body.properties.spectralClass}</strong></span>}
+                        </div>
                     </div>
                 </div>
 

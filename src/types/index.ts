@@ -16,6 +16,8 @@ export enum CelestialType {
     NEBULA       = 'NEBULA',       // Nébuleuse
     GALAXY       = 'GALAXY',       // Galaxie
     ASTEROID     = 'ASTEROID',     // Astéroïde ou ceinture
+    PROBE        = 'PROBE',        // Sonde spatiale interstellaire (Voyager 1/2, JWST)
+    DEEP_SKY     = 'DEEP_SKY',     // Amas d'étoiles, pulsar, centre galactique
 }
 
 /** Classe spectrale d'une étoile selon la classification de Harvard */
@@ -60,6 +62,8 @@ export interface PhysicalProperties {
     spectralClass?: string;
     /** Âge estimé (ex: "4.6 Ga") */
     age?: string;
+    /** Vitesse de déplacement ou vitesse orbitale (ex: "17.0 km/s") */
+    speed?: string;
     /** Luminosité (ex: "1.0 Sol") */
     luminosity?: string;
 }

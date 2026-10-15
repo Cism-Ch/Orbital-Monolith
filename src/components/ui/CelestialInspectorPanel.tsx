@@ -2,7 +2,7 @@
 
 /**
  * @file components/ui/CelestialInspectorPanel.tsx
- * @description Panneau d'inspection astre responsive avec snap points mobiles — Orbital Monolith v3.6.
+ * @description Panneau d'inspection astre responsive avec snap points mobiles — Orbital Monolith v3.7.
  * Utilisé par Sector Control (/dashboard) et Star Cartography / Sky Map (/dashboard/map).
  *
  * Sur Mobile (< md) :
@@ -37,6 +37,8 @@ const TYPE_LABELS: Record<string, string> = {
     GALAXY:       'Galaxie',
     NEBULA:       'Nébuleuse',
     ASTEROID:     'Astéroïde',
+    PROBE:        'Sonde Spatiale (DSN)',
+    DEEP_SKY:     'Objet Ciel Profond (DSO)',
 };
 
 type SnapState = 'peek' | 'half' | 'full';

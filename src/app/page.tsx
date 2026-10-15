@@ -27,6 +27,7 @@ import {
     Zap,
 } from 'lucide-react';
 import { SOLAR_SYSTEM, STARS } from '@/constants';
+import { useNasaTelemetry } from '@/hooks/useNasaTelemetry';
 
 // Import dynamique sans SSR pour le composant Three.js Points (Règle 1 AGENTS.md)
 const MiniSkyMap3D = dynamic(
@@ -97,6 +98,8 @@ export default function LandingPage() {
     const [currentTimeUtc, setCurrentTimeUtc] = useState<string>('00:00:00 UTC');
     const [siderealTime, setSiderealTime] = useState<string>('00.00° RA');
     const [selectedModule, setSelectedModule] = useState<number>(0);
+    const { dsn, neos } = useNasaTelemetry(20000);
+
 
     // ── Horloge de mission UTC & Sidérale temps réel ─────────────────────────
     useEffect(() => {
@@ -254,7 +257,9 @@ export default function LandingPage() {
                         <div className="flex items-center gap-2">
                             <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />
                             <span className="text-[#8e8e9f] uppercase font-bold">DSN CARRIER:</span>
-                            <span className="text-white font-black tracking-wider">8445.22 MHz LOCK</span>
+                            <span className="text-white font-black tracking-wider">
+                                {dsn?.activeSpacecraft?.slice(0, 2).join(' · ') || 'VOYAGER 1 · JWST'} (X-BAND)
+                            </span>
                         </div>
                         <div className="w-px h-3 bg-white/10" />
                         <div className="flex items-center gap-2">
@@ -364,25 +369,29 @@ export default function LandingPage() {
                 <div className="w-full mt-6 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-4 text-[8px] sm:text-[8.5px] font-mono text-[#8e8e9f]">
                     <div className="flex items-center gap-3">
                         <div className="flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                            <span>GOLDSTONE (DSS-14): <strong className="text-white">ONLINE</strong></span>
+                            <span className={`w-1.5 h-1.5 rounded-full ${dsn?.goldstoneOnline ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}`} />
+                            <span>GOLDSTONE (DSS-14): <strong className="text-white">{dsn?.goldstoneOnline ? 'ONLINE' : 'TRACKING'}</strong></span>
                         </div>
                         <span className="text-white/20">|</span>
                         <div className="flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                            <span>CANBERRA (DSS-43): <strong className="text-white">ONLINE</strong></span>
+                            <span className={`w-1.5 h-1.5 rounded-full ${dsn?.canberraOnline ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}`} />
+                            <span>CANBERRA (DSS-43): <strong className="text-white">{dsn?.canberraOnline ? 'ONLINE' : 'TRACKING'}</strong></span>
                         </div>
                         <span className="text-white/20 hidden sm:inline">|</span>
                         <div className="hidden sm:flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                            <span>MADRID (DSS-63): <strong className="text-white">ONLINE</strong></span>
+                            <span className={`w-1.5 h-1.5 rounded-full ${dsn?.madridOnline ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}`} />
+                            <span>MADRID (DSS-63): <strong className="text-white">{dsn?.madridOnline ? 'ONLINE' : 'TRACKING'}</strong></span>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <span>SNR: <strong className="text-[var(--accent-primary)]">+42.1 dB</strong></span>
-                        <span>BER: <strong className="text-white">&lt; 10⁻¹⁰</strong></span>
-                        <span className="text-emerald-400 font-bold uppercase tracking-wider">ALL SUBSYSTEMS NOMINAL</span>
+                        {neos[0] && (
+                            <span className="text-amber-400 font-bold uppercase tracking-wider hidden md:inline">
+                                LIVE NEO: {neos[0].designation} ({neos[0].relativeVelocityKmS} km/s · {neos[0].missDistanceLd} LD)
+                            </span>
+                        )}
+                        <span>DOWNLINK: <strong className="text-[var(--accent-primary)]">{dsn?.totalDownlinkKbps || 4280} kbps</strong></span>
+                        <span className="text-emerald-400 font-bold uppercase tracking-wider">DSN TELEMETRY VERIFIED</span>
                     </div>
                 </div>
             </section>

@@ -20,6 +20,7 @@ import { useDashboard } from '@/lib/DashboardContext';
 import { useScenePointer } from '@/hooks/useScenePointer';
 import { SOLAR_SYSTEM } from '@/constants';
 import { CelestialType, type CelestialBody } from '@/types';
+import { getKeplerianState } from '@/services/nasaService';
 
 // ═════════════════════════════════════════════════════════════════════════════
 // Props
@@ -48,12 +49,16 @@ function visualRadius(radiusStr: string | undefined, fallback: number): number {
     return 8 + Math.max(0, Math.min(1, logRatio)) * 20;
 }
 
-/** Rayon orbital en unités 3D selon la distance UA */
-function orbitalRadius(index: number, body: CelestialBody): number {
-    if (body.id === 'ceres') return 400;
-    if (index < 4) return (index + 1) * 70 + 60;           // planètes telluriques
-    return (index - 4) * 120 + 550;                          // géantes + kuiper
+/** 
+ * Rayon orbital 3D dérivé du demi-grand axe réel (a en UA)
+ * Échelle à puissance progressive conservant l'ordre et les proportions astrophysiques
+ */
+function orbitalRadius(body: CelestialBody): number {
+    const k = getKeplerianState(body.id);
+    const a = k ? k.semiMajorAxisAu : 1.0;
+    return Math.pow(a, 0.65) * 140 + 40;
 }
+
 
 // ═════════════════════════════════════════════════════════════════════════════
 // Composant
@@ -180,8 +185,10 @@ export const SolarSystemView: React.FC<SolarSystemViewProps> = ({ onSelect, onHo
             disposableMats.push(mat);
             scene.add(new THREE.Points(geo, mat));
         };
-        createBelt(365, 435, 3000, 0x888888, 0.4);  // Ceinture principale
-        createBelt(920, 1180, 4000, 0x4466aa, 0.25); // Ceinture de Kuiper (simplifiée)
+        // Ceinture principale d'astéroïdes (entre Mars à ~223 et Jupiter à ~449)
+        createBelt(260, 360, 3000, 0x888888, 0.4);
+        // Ceinture de Kuiper (au-delà de l'orbite de Neptune à ~1321)
+        createBelt(1200, 1650, 4000, 0x4466aa, 0.25);
 
         // ── 6. Soleil ────────────────────────────────────────────────────────
         const sunGeo = new THREE.SphereGeometry(38, 64, 64);
@@ -219,7 +226,7 @@ export const SolarSystemView: React.FC<SolarSystemViewProps> = ({ onSelect, onHo
         // ── 7. Planètes ──────────────────────────────────────────────────────
         const planets: PlanetEntry[] = [];
         SOLAR_SYSTEM.slice(1).forEach((planet, idx) => {
-            const orbitR = orbitalRadius(idx, planet);
+            const orbitR = orbitalRadius(planet);
             const size = visualRadius(planet.properties.radius, 12 + idx);
 
             // Anneau orbital
@@ -286,14 +293,20 @@ export const SolarSystemView: React.FC<SolarSystemViewProps> = ({ onSelect, onHo
                 pMesh.add(satRing);
             }
 
+            // Calcul képlérien réel de la position temporelle (anomalie vraie) pour la date courante
+            const kState = getKeplerianState(planet.id, new Date());
+            const initialAngle = kState ? THREE.MathUtils.degToRad(kState.trueAnomalyDeg) : 0;
+            // Vitesse képlérienne 3ème loi de Kepler : n proportionnelle à a^(-3/4)
+            const speed = 0.005 / Math.pow(kState ? kState.semiMajorAxisAu : 1, 0.75);
+
             planets.push({
                 mesh: pMesh,
                 glow: pGlow,
                 orbitRing: ring,
                 body: planet,
                 orbit: orbitR,
-                speed: 0.003 / Math.max(0.01, orbitR * 0.01),
-                angle: Math.random() * Math.PI * 2,
+                speed,
+                angle: initialAngle,
             });
         });
         planetsRef.current = planets;

@@ -5,16 +5,16 @@ import { motion } from 'framer-motion';
 import { ArrowRightLeft, Radio, Globe2, Target, RotateCcw } from 'lucide-react';
 import { CelestialBody } from '@/types';
 import { useDashboard } from '@/lib/DashboardContext';
-import { calculateDistance } from '@/services/celestialService';
+import { SOLAR_SYSTEM } from '@/constants';
+import { calculateAstrophysicalDistance } from '@/services/nasaService';
 
 interface AstrometricalBridgeProps {
     selectedBody: CelestialBody;
-    distanceToEarth: string;
+    distanceToEarth?: string;
 }
 
 export const AstrometricalBridge: React.FC<AstrometricalBridgeProps> = ({
     selectedBody,
-    distanceToEarth,
 }) => {
     const {
         isMeasuringMode,
@@ -26,8 +26,13 @@ export const AstrometricalBridge: React.FC<AstrometricalBridgeProps> = ({
     const pointA = distancePoints[0];
     const pointB = distancePoints[1];
     
-    // Calculate distance between custom points if both are selected
-    const customDistance = pointA && pointB ? calculateDistance(pointA, pointB) : null;
+    // Calcul astrophysique réel 3D entre deux points personnalisés
+    const customResult = pointA && pointB ? calculateAstrophysicalDistance(pointA, pointB) : null;
+
+    // Calcul astrophysique réel 3D entre la Terre et l'astre sélectionné
+    const earthBody = SOLAR_SYSTEM[3]; // Terre
+    const earthResult = calculateAstrophysicalDistance(selectedBody, earthBody);
+
 
     return (
         <div className="space-y-6">
@@ -80,10 +85,17 @@ export const AstrometricalBridge: React.FC<AstrometricalBridgeProps> = ({
 
                         {/* Connection Laser Line & Info */}
                         <div className="flex-1 flex flex-col items-center gap-2 min-w-0">
-                            <div className="flex items-center gap-1 mb-1 truncate max-w-full">
-                                {customDistance ? (
+                            <div className="flex flex-col items-center gap-0.5 mb-1 truncate max-w-full">
+                                {customResult ? (
                                     <>
-                                        <span className="text-[10px] font-mono text-[var(--accent-primary)] font-black tracking-tighter truncate">{customDistance}</span>
+                                        <span className="text-[10px] font-mono text-[var(--accent-primary)] font-black tracking-tighter truncate">
+                                            {customResult.formatted}
+                                        </span>
+                                        {customResult.lightDelayFormatted && (
+                                            <span className="text-[7.5px] font-mono text-emerald-400 font-bold tracking-tight">
+                                                {customResult.lightDelayFormatted}
+                                            </span>
+                                        )}
                                     </>
                                 ) : (
                                     <span className="text-[8px] text-[#6c6c7a] font-bold uppercase tracking-widest animate-pulse truncate">
@@ -93,8 +105,8 @@ export const AstrometricalBridge: React.FC<AstrometricalBridgeProps> = ({
                             </div>
 
                             <div className="w-full relative h-1 flex items-center">
-                                <div className={`w-full h-px ${customDistance ? "bg-[var(--accent-primary)]/20" : "bg-white/10"}`} />
-                                {customDistance && (
+                                <div className={`w-full h-px ${customResult ? "bg-[var(--accent-primary)]/20" : "bg-white/10"}`} />
+                                {customResult && (
                                     <motion.div
                                         animate={{ x: [-20, 100] }}
                                         transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
@@ -150,10 +162,11 @@ export const AstrometricalBridge: React.FC<AstrometricalBridgeProps> = ({
                         </div>
 
                         {/* Connection Line & Data */}
-                        <div className="flex-1 flex flex-col items-center gap-2">
-                            <div className="flex items-center gap-2 mb-1">
-                                <span className="text-[10px] font-mono text-white font-black tracking-tighter">{distanceToEarth}</span>
-                                <span className="text-[8px] text-[#6c6c7a] font-bold">KM</span>
+                        <div className="flex-1 flex flex-col items-center gap-2 min-w-0">
+                            <div className="flex flex-col items-center gap-0.5 mb-1 max-w-full">
+                                <span className="text-[9.5px] font-mono text-white font-black tracking-tight text-center">
+                                    {earthResult.formatted}
+                                </span>
                             </div>
 
                             <div className="w-full relative h-1 flex items-center">
@@ -170,9 +183,11 @@ export const AstrometricalBridge: React.FC<AstrometricalBridgeProps> = ({
                                 </div>
                             </div>
 
-                            <div className="mt-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/5 flex items-center gap-2">
+                            <div className="mt-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/5 flex items-center gap-2">
                                 <ArrowRightLeft size={10} className="text-[var(--accent-primary)]" />
-                                <span className="text-[8px] font-black text-[#6c6c7a] uppercase tracking-widest">Signal_Delay: 3.4s</span>
+                                <span className="text-[8px] font-mono font-bold text-[#8e8e9f] uppercase tracking-wider">
+                                    Signal Delay: <strong className="text-emerald-400">{earthResult.lightDelayFormatted || 'INSTANT'}</strong>
+                                </span>
                             </div>
                         </div>
 

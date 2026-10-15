@@ -5,6 +5,27 @@ Toutes les modifications majeures apportées au projet **Orbital Monolith** sont
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
 et ce projet adhère au sémantisme de versioning [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [3.7.0] - 2026-10-15
+
+### 🌌 Cartographie Céleste Avancée, Objets du Ciel Profond & Sondes NASA
+- **Intégration Réelle de 32 Constellations UAI** :
+  - Remplacement des données fictives et du pseudo-groupe zodiaque par les tracés astronomiques officiels de 32 constellations majeures (les 12 du Zodiaque, boréales et australes).
+  - Connexions filaires Three.js reliant les étoiles authentiques issues des catalogues Gaia DR3 et Hipparcos.
+- **Plan de l'Écliptique 3D & Repères Zodiacaux** :
+  - Tracé d'une ellipse dorée paramétrique 3D inclinée selon l'obliquité terrestre $\epsilon = 23{,}44^\circ$.
+  - Affichage des 12 glyphes zodiacaux orientés vers la caméra en sprites vectoriels dynamiques.
+- **Objets du Ciel Profond (DSO Messier & Sagittarius A\*)** :
+  - Ajout des nébuleuses et amas stellaires majeurs : M42 (Orion), M45 (Pléiades), M13 (Hercule), M1 (Crabe), M57 (Anneau) et le trou noir supermassif central Sagittarius A\*.
+  - Rendu volumétrique dual-layer à particules stellaires Three.js.
+- **Sondes Interstellaires en Temps Réel (NASA Deep Space Network)** :
+  - Intégration de Voyager 1, Voyager 2, New Horizons et JWST avec balises octaédriques, ondes radio pulsées et faisceaux porteurs DSN reliant la Terre $(0,0,0)$.
+  - Calcul et affichage en direct du temps de parcours du signal optique/radio (ex: 22h38 pour Voyager 1).
+- **Grands Astérismes Célestes** :
+  - Tracés spécifiques en Three.js du Triangle d'Été, Triangle d'Hiver, Pointeurs du Sud et Grand Carré de Pégase.
+- **Dock Flottant Centré en Bas & Ergonomie Tactile** :
+  - Relocalisation des commutateurs de calques dans une barre capsule flottante centrée au bas de l'écran (`bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2`), éliminant tout chevauchement avec la barre de recherche du header.
+  - Cibles tactiles respectant scrupuleusement la norme ergonomique $\ge 44\times 44\text{px}$.
+
 ## [3.6.1] - 2026-07-20
 
 ### 🎛️ Panneau de Contrôle Scène Repliable & Documentation Anglaise

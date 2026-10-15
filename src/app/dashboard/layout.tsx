@@ -38,6 +38,7 @@ import { UniverseEngineProvider, useUniverseEngine } from '@/lib/UniverseEngineC
 import { useKeyboardNavigation } from '@/hooks/useKeyboardNavigation';
 import { searchCelestial } from '@/services/celestialService';
 import type { CelestialBody } from '@/types';
+import { useNasaTelemetry } from '@/hooks/useNasaTelemetry';
 
 import { SceneControlPanel } from '@/components/ui/SceneControlPanel';
 
@@ -158,11 +159,35 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         };
     }, [showNotifications]);
 
-    const systemNotifications = [
-        { id: 1, title: 'GAIA Node Connected', text: 'Telemetry stream established at 12ms latency.', time: '2m ago' },
-        { id: 2, title: 'Solar Flare Alert', text: 'Class M2.4 solar flare detected in Sector Sol-01.', time: '14m ago' },
-        { id: 3, title: 'New Ephemeris Data', text: 'Gaia DR3 star position matrix updated.', time: '1h ago' },
-    ];
+    const { dsn, neos } = useNasaTelemetry(25000);
+
+    const systemNotifications = useMemo(() => {
+        const notifs = [];
+        if (dsn?.dishes && dsn.dishes.length > 0) {
+            const activeDish = dsn.dishes.find(d => d.status === 'TRACKING') || dsn.dishes[0];
+            notifs.push({
+                id: 1,
+                title: `NASA DSN ${activeDish.station.toUpperCase()}`,
+                text: `${activeDish.name} verrouillé sur ${activeDish.activeTargets.join(', ') || 'DEEP_SPACE'} (${activeDish.signals[0]?.frequencyMHz || 8445} MHz).`,
+                time: 'EN DIRECT',
+            });
+        }
+        if (neos && neos.length > 0) {
+            notifs.push({
+                id: 2,
+                title: `ASTÉROÏDE GÉOCROISEUR // ${neos[0].designation}`,
+                text: `Survol prévu le ${neos[0].closeApproachDate} à ${neos[0].missDistanceLd} LD (${neos[0].relativeVelocityKmS} km/s).`,
+                time: 'HORIZONS JPL',
+            });
+        }
+        notifs.push({
+            id: 3,
+            title: 'ÉPHÉMÉRIDES J2000.0 ACTIVES',
+            text: 'Calculs de mécanique képlérienne synchronisés avec les standards IAU/JPL.',
+            time: 'CALCULÉ',
+        });
+        return notifs;
+    }, [dsn, neos]);
 
     return (
         <div

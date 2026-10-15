@@ -2,7 +2,7 @@
 
 /**
  * @file components/view/CelestialBody3D.tsx
- * @description Hologramme 3D Three.js pour visualisation détaillée d'un astre — Orbital Monolith v3.6.
+ * @description Hologramme 3D Three.js pour visualisation détaillée d'un astre — Orbital Monolith v3.7.
  *
  * Optimisations :
  * - Performance : RAF loop fluide sans démontage intempestif du renderer lors du survol (utilisation de refs).
