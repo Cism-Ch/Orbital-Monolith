@@ -91,13 +91,13 @@ Orbital-Monolith/
 ### Prerequisites
 
 - Node.js v18+ 
-- npm, yarn, or pnpm
+- pnpm (v10+ ou v12+)
 
 ### Installation
 
 1. **Clone the repository & install dependencies**:
    ```bash
-   npm install
+   pnpm install
    ```
 
 2. **Configure Environment Variables**:
@@ -108,7 +108,7 @@ Orbital-Monolith/
 
 3. **Start the Development Server**:
    ```bash
-   npm run dev
+   pnpm dev
    ```
 
 4. **Launch Application**:
@@ -118,11 +118,12 @@ Orbital-Monolith/
 
 ## 📜 Available Scripts
 
-- `npm run dev` - Launches the Next.js development server with Turbopack.
-- `npm run build` - Compiles the production application bundle.
-- `npm run start` - Runs the compiled production build.
-- `npm run lint` - Runs ESLint code quality checks.
-- `npx tsc --noEmit` - Executes TypeScript strict type checking.
+- `pnpm dev` - Launches the Next.js development server with Turbopack.
+- `pnpm build` - Compiles the production application bundle.
+- `pnpm start` - Runs the compiled production build.
+- `pnpm lint` - Runs ESLint code quality checks.
+- `pnpm type-check` - Executes TypeScript strict type checking (`tsc --noEmit`).
+
 
 ---
 

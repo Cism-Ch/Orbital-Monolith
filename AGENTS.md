@@ -60,12 +60,13 @@ Avant de déclarer une tâche ou une fonctionnalité comme terminée :
 
 1. **Vérification TypeScript Strict** :
    ```bash
-   npm run type-check
+   pnpm type-check
    ```
    Doit renvoyer **0 erreur**.
 
 2. **Validation du Build de Production** :
    ```bash
-   npm run build
+   pnpm build
    ```
    Toutes les routes statiques doivent être compilées proprement.
+
